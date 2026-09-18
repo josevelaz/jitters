@@ -4,21 +4,64 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Not found · jitters</title>
-  <meta name="theme-color" content="#080c16">
-  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <meta name="description" content="That URL is not part of the jitters documentation.">
+  <meta name="theme-color" content="#f4f1e8">
+  <link rel="icon" href="/jitters/assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./assets/site.css">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/jitters/assets/site.css">
 </head>
-<body>
-  <header class="top">
-    <a class="wordmark" href="./index.html">jitt<span>ers</span></a>
+<body class="site page page--not-found">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="brand" href="/jitters/">
+        <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="4" fill="#F4F1E8"/><rect x="4" y="5" width="24" height="22" rx="3" fill="#151718"/><rect x="7" y="8" width="18" height="16" rx="1" fill="#1748D2"/><path d="M14 11v11l3.2-3 2.5 5 2.4-1.2-2.5-4.8H24L14 11Z" fill="#FFFDF7"/></svg>
+        <span class="brand__name">jitters</span>
+        <span class="brand__section">Docs</span>
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav"><span>Menu</span></button>
+      <nav id="site-nav" class="site-nav" aria-label="Primary">
+        <ul class="site-nav__list">
+          <li><a href="/jitters/tutorial.html">Tutorial</a></li>
+          <li><a href="/jitters/how-to.html">How-to</a></li>
+          <li><a href="/jitters/reference.html">Reference</a></li>
+          <li><a href="/jitters/explanation.html">Explanation</a></li>
+          <li><a class="site-nav__source" href="https://github.com/josevelaz/jitters">GitHub</a></li>
+        </ul>
+      </nav>
+    </div>
   </header>
-  <main class="wrap prose">
-    <p class="kicker">404</p>
-    <h1>This frame is empty.</h1>
-    <p>That URL is not in the docs. Start from the <a href="./index.html">home page</a> or the <a href="./tutorial.html">first-capture tutorial</a>.</p>
+
+  <main id="main">
+    <div>
+      <p class="eyebrow">404 / Missing take</p>
+      <div class="missing-take" aria-hidden="true">No frame</div>
+      <h1>Cut. This frame is missing.</h1>
+      <p class="page-lede">The URL is not part of the documentation.</p>
+      <div class="missing-actions">
+        <a class="button button--primary" href="/jitters/">Return home</a>
+        <a class="button button--ghost" href="/jitters/tutorial.html">Capture your first demo</a>
+      </div>
+    </div>
   </main>
+
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <div>
+        <span class="site-footer__brand">jitters</span>
+        <span class="site-footer__tag">Prompt in. MP4 out.</span>
+      </div>
+      <nav aria-label="Footer">
+        <a href="/jitters/tutorial.html">Tutorial</a>
+        <a href="/jitters/how-to.html">How-to</a>
+        <a href="/jitters/reference.html">Reference</a>
+        <a href="/jitters/explanation.html">Explanation</a>
+        <a href="https://github.com/josevelaz/jitters">Source</a>
+      </nav>
+    </div>
+  </footer>
+  <script defer src="/jitters/assets/site.js"></script>
 </body>
 </html>

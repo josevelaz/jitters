@@ -5,78 +5,166 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Explanation — Capture, judgment, and the compositor · jitters</title>
   <meta name="description" content="Why jitters splits browser capture from studio compositing, and why the agent cannot invent text or URLs.">
-  <meta name="theme-color" content="#080c16">
+  <meta name="theme-color" content="#f4f1e8">
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./assets/site.css">
 </head>
-<body>
-  <a class="skip" href="#main">Skip to content</a>
-  <header class="top">
-    <a class="wordmark" href="./index.html">jitt<span>ers</span></a>
-    <input type="checkbox" id="nav-toggle">
-    <label class="nav-btn" for="nav-toggle">Menu</label>
-    <nav>
-      <a href="./tutorial.html">Tutorial</a>
-      <a href="./how-to.html">How-to</a>
-      <a href="./reference.html">Reference</a>
-      <a href="./explanation.html" aria-current="page">Explanation</a>
-      <a class="gh" href="https://github.com/josevelaz/jitters">GitHub</a>
-    </nav>
+<body class="site page page--explanation">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="brand" href="./index.html">
+        <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="4" fill="#F4F1E8"/><rect x="4" y="5" width="24" height="22" rx="3" fill="#151718"/><rect x="7" y="8" width="18" height="16" rx="1" fill="#1748D2"/><path d="M14 11v11l3.2-3 2.5 5 2.4-1.2-2.5-4.8H24L14 11Z" fill="#FFFDF7"/></svg>
+        <span class="brand__name">jitters</span>
+        <span class="brand__section">Docs</span>
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav"><span>Menu</span></button>
+      <nav id="site-nav" class="site-nav" aria-label="Primary">
+        <ul class="site-nav__list">
+          <li><a href="./tutorial.html">Tutorial</a></li>
+          <li><a href="./how-to.html">How-to</a></li>
+          <li><a href="./reference.html">Reference</a></li>
+          <li><a href="./explanation.html" aria-current="page">Explanation</a></li>
+          <li><a class="site-nav__source" href="https://github.com/josevelaz/jitters">GitHub</a></li>
+        </ul>
+      </nav>
+    </div>
   </header>
 
-  <div class="wrap layout">
-    <aside class="toc">
-      <p>Discussion</p>
-      <a href="#two-passes">Two passes</a>
-      <a href="#pixels">Page pixels only</a>
-      <a href="#closed">Closed candidates</a>
-      <a href="#control">Code owns control flow</a>
-      <a href="#look">Look is data</a>
+  <main id="main" class="docs-shell">
+    <aside class="section-rail">
+      <details class="section-nav" open>
+        <summary>On this page</summary>
+        <nav aria-label="On this page">
+          <ol class="section-nav__list">
+            <li><a href="#two-passes">Two passes</a></li>
+            <li><a href="#pixels">Page pixels only</a></li>
+            <li><a href="#closed">Closed candidates</a></li>
+            <li><a href="#control">Code owns control flow</a></li>
+            <li><a href="#look">Look is data</a></li>
+          </ol>
+        </nav>
+      </details>
     </aside>
-    <main id="main" class="prose">
-      <p class="kicker">Explanation</p>
-      <h1>A take, then a grade</h1>
-      <p>jitters is closer to a film pipeline than to a screen recorder. One command looks like “prompt in, MP4 out”, but the work splits in two so you can change the look without performing the scene again.</p>
 
-      <h2 id="two-passes">Two passes</h2>
-      <p><strong>Capture</strong> is the take. An isolated <code>agent-browser</code> session opens Chrome, sets a 1440×900 viewport, and records the page while a judgment backend chooses the next action. When the loop stops, the project directory holds footage, a mouse track, a semantic timeline, and a style file.</p>
-      <p><strong>Render</strong> is the grade. A 2D compositor reads those artifacts, crops and zooms around timeline targets, paints the framed window onto the styled canvas, draws a cursor along a Bézier fitted through the samples, and encodes with ffmpeg. No browser is involved.</p>
-      <p>That is why <code>jitters render ./demo.jitters</code> can change cursor size, zoom, motion blur, padding, or background without launching Chrome. Recapture is only for a different story on the page.</p>
+        <header class="page-header">
+          <p class="eyebrow">Explanation</p>
+          <h1>A take, then a grade</h1>
+          <p class="page-lede">jitters is closer to a film pipeline than to a screen recorder. One command looks like “prompt in, MP4 out”, but the work splits in two so you can change the look without performing the scene again.</p>
+        </header>
 
-      <h2 id="pixels">Why the capture has no cursor</h2>
-      <p>If the pointer were burned into <code>capture.mp4</code>, restyle would be a second-rate overlay: you could not change size, path smoothing, ripples, or shutter, and you could not hide the OS arrow. jitters records page pixels only (<code>record start</code> without <code>--cursor</code>) and samples <code>mousemove</code> / <code>mousedown</code> / <code>mouseup</code> into <code>cursor.json</code>.</p>
-      <p>The compositor then draws a synthetic cursor. The path is not click-to-click shortcuts. Human-like moves, loops, and overshoots in the samples stay, because the curve is fitted through the whole track. Click ripples come from button-down samples. Motion blur averages shutter samples of the camera transform and of the cursor.</p>
-      <p><code>timeline.json</code> is a different document: it names click, type, and scroll events with element boxes so the camera knows what to zoom toward. It is not the pointer path.</p>
+        <div class="doc-flow">
+        <p class="pull-quote">Capture is the take. Render is the grade.</p>
 
-      <h2 id="closed">Why the agent cannot invent text</h2>
-      <p>The judgment layer answers structured questions (choices and probabilities). It does not generate free text. Typing “whatever seems right” would make demos lie, leak prompt leftovers, or walk into fields the user never named.</p>
-      <p>So jitters extracts a closed set from the prompt before the loop starts:</p>
-      <ul>
-        <li>quoted strings</li>
-        <li>phrases after “search for”, “type”, or “enter”</li>
-        <li>explicit <code>http(s)://</code> URLs</li>
-        <li>the optional <code>--url</code></li>
-      </ul>
-      <p>Every type/navigate choice includes <code>none</code>. If the backend picks an action whose value is <code>none</code>, or a value outside the set, the run finishes. That is a successful stop, not a license to improvise. Quote the strings you want typed.</p>
+        <section id="two-passes" class="doc-section">
+          <h2>Two passes</h2>
+          <figure class="system-figure system-figure--two-pass">
+            <ol class="system-figure__flow">
+              <li class="system-node"><strong>Capture</strong> Chrome and the judgment loop</li>
+              <li class="system-node system-node--files"><strong>Project</strong> <code>capture.mp4</code>, <code>cursor.json</code>, <code>timeline.json</code>, <code>style.json</code></li>
+              <li class="system-node"><strong>Render</strong> compositor and ffmpeg</li>
+              <li class="system-node system-node--output"><strong>Output</strong> framed MP4</li>
+            </ol>
+            <p class="system-figure__loop">Edit <code>style.json</code> and render again</p>
+            <figcaption>Capture performs the scene; render changes its finish.</figcaption>
+          </figure>
+          <p><strong>Capture</strong> is the take. An isolated <code>agent-browser</code> session opens Chrome, sets a 1440×900 viewport, and records the page while a judgment backend chooses the next action. When the loop stops, the project directory holds footage, a mouse track, a semantic timeline, and a style file.</p>
+          <p><strong>Render</strong> is the grade. A 2D compositor reads those artifacts, crops and zooms around timeline targets, paints the framed window onto the styled canvas, draws a cursor along a Bézier fitted through the samples, and encodes with ffmpeg. No browser is involved.</p>
+          <p>That is why <code>jitters render ./demo.jitters</code> can change cursor size, zoom, motion blur, padding, or background without launching Chrome. Recapture is only for a different story on the page.</p>
+        </section>
 
-      <h2 id="control">Code owns control flow</h2>
-      <p>Each step is one judgment request with static question text. Untrusted page snapshot, title, and body text travel in <code>state</code> only — they are never spliced into instructions, so a page cannot rewrite the questions.</p>
-      <p>The program consumes only the <code>next_action</code> branch. Speculative answers on unused branches are ignored. Code, not the model, decides when to snapshot, when to hold for zoom-out, when to refuse a repeat click or a second visit to the same URL, and when three identical actions mean the run is stuck.</p>
-      <p>TypeSafe System One is the native backend. Vercel AI Gateway, OpenRouter, and Cloudflare AI Gateway answer the same closed-set questions as JSON. The loop does not change; only the client does. API keys stay in the environment so they cannot leak into <code>jitters.toml</code>, stdout, or the encoded video.</p>
+        <section id="pixels" class="doc-section">
+          <h2>Why the capture has no cursor</h2>
+          <figure class="system-figure">
+            <ol class="layer-stack">
+              <li><strong>capture.mp4</strong> — page pixels</li>
+              <li><strong>cursor.json</strong> — sampled motion and button state</li>
+              <li><strong>timeline.json</strong> — semantic event boxes</li>
+              <li><strong>style.json</strong> — visual tokens</li>
+              <li class="layer-out">Compositor</li>
+            </ol>
+            <figcaption>Four artifacts feed one grade. The pointer is drawn later, not burned into the take.</figcaption>
+          </figure>
+          <p>If the pointer were burned into <code>capture.mp4</code>, restyle would be a second-rate overlay: you could not change size, path smoothing, ripples, or shutter, and you could not hide the OS arrow. jitters records page pixels only (<code>record start</code> without <code>--cursor</code>) and samples <code>mousemove</code> / <code>mousedown</code> / <code>mouseup</code> into <code>cursor.json</code>.</p>
+          <p>The compositor then draws a synthetic cursor. The path is not click-to-click shortcuts. Human-like moves, loops, and overshoots in the samples stay, because the curve is fitted through the whole track. Click ripples come from button-down samples. Motion blur averages shutter samples of the camera transform and of the cursor.</p>
+          <p><code>timeline.json</code> is a different document: it names click, type, and scroll events with element boxes so the camera knows what to zoom toward. It is not the pointer path.</p>
+        </section>
 
-      <h2 id="look">Look is data</h2>
-      <p>Default tokens live in <code>style.json</code>: 1920×1080 canvas, inset rounded window, drop shadow, dark-to-blue gradient, zoom 1.0→1.6 with a cubic envelope, cursor size, ripple color, motion-blur shutter. Because those values are data, a later export can look like a different product film from the same take.</p>
-      <p>The CLI is the whole product surface. There is no post-record GUI, no camera bubble, and no voiceover track. Agents parse one JSON object and, if the look is wrong, edit JSON and render again.</p>
-    </main>
-  </div>
+        <section id="closed" class="doc-section">
+          <h2>Why the agent cannot invent text</h2>
+          <figure class="system-figure">
+            <div class="candidate-tree">
+              <p><strong>Prompt</strong></p>
+              <ul>
+                <li>quoted strings</li>
+                <li>text after “search for”, “type”, or “enter”</li>
+                <li>explicit URLs</li>
+                <li>optional <code>--url</code></li>
+              </ul>
+              <p><strong>Closed choice</strong></p>
+              <ul>
+                <li>allowed value → action</li>
+                <li><code>none</code> or outside the set → finish</li>
+              </ul>
+            </div>
+            <figcaption>Typing and navigation are chosen from a closed set extracted before the loop starts.</figcaption>
+          </figure>
+          <p>The judgment layer answers structured questions (choices and probabilities). It does not generate free text. Typing “whatever seems right” would make demos lie, leak prompt leftovers, or walk into fields the user never named.</p>
+          <p>So jitters extracts a closed set from the prompt before the loop starts. Every type/navigate choice includes <code>none</code>. If the backend picks an action whose value is <code>none</code>, or a value outside the set, the run finishes. That is a successful stop, not a license to improvise. Quote the strings you want typed.</p>
+        </section>
 
-  <footer class="foot">
-    <span>jitters · prompt in, MP4 out</span>
-    <span><a href="./tutorial.html">Back to the tutorial</a></span>
+        <section id="control" class="doc-section">
+          <h2>Code owns control flow</h2>
+          <p>Each step is one judgment request with static question text. Untrusted page snapshot, title, and body text travel in <code>state</code> only — they are never spliced into instructions, so a page cannot rewrite the questions.</p>
+          <p>The program consumes only the <code>next_action</code> branch. Speculative answers on unused branches are ignored. Code, not the model, decides when to snapshot, when to hold for zoom-out, when to refuse a repeat click or a second visit to the same URL, and when three identical actions mean the run is stuck.</p>
+          <p>TypeSafe System One is the native backend. Vercel AI Gateway, OpenRouter, and Cloudflare AI Gateway answer the same closed-set questions as JSON. The loop does not change; only the client does. API keys stay in the environment so they cannot leak into <code>jitters.toml</code>, stdout, or the encoded video.</p>
+        </section>
+
+        <section id="look" class="doc-section">
+          <h2>Look is data</h2>
+          <div class="token-strip" aria-hidden="true">
+            <span>1920×1080</span>
+            <span>padding 24</span>
+            <span>radius 16</span>
+            <span>zoom 1.6</span>
+            <span>cursor 32</span>
+            <span>shutter 0.5</span>
+          </div>
+          <p>Default tokens live in <code>style.json</code>: 1920×1080 canvas, inset rounded window, drop shadow, dark-to-blue gradient, zoom 1.0→1.6 with a cubic envelope, cursor size, ripple color, motion-blur shutter. Because those values are data, a later export can look like a different product film from the same take.</p>
+          <p>The CLI is the whole product surface. There is no post-record GUI, no camera bubble, and no voiceover track. Agents parse one JSON object and, if the look is wrong, edit JSON and render again.</p>
+        </section>
+        </div>
+  </main>
+
+  <nav class="page-next" aria-label="Documentation pagination">
+    <a class="page-next__item page-next__item--previous" href="./reference.html">
+      <span class="page-next__dir">Previous</span>
+      <span>CLI and project reference</span>
+    </a>
+    <a class="page-next__item page-next__item--next" href="./tutorial.html">
+      <span class="page-next__dir">Next</span>
+      <span>Capture your first demo</span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <div>
+        <span class="site-footer__brand">jitters</span>
+        <span class="site-footer__tag">Prompt in. MP4 out.</span>
+      </div>
+      <nav aria-label="Footer">
+        <a href="./tutorial.html">Tutorial</a>
+        <a href="./how-to.html">How-to</a>
+        <a href="./reference.html">Reference</a>
+        <a href="./explanation.html">Explanation</a>
+        <a href="https://github.com/josevelaz/jitters">Source</a>
+      </nav>
+    </div>
   </footer>
-  <script src="./assets/site.js"></script>
+  <script defer src="./assets/site.js"></script>
 </body>
 </html>

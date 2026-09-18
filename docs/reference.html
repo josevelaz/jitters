@@ -5,108 +5,157 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Reference — CLI, style, config, stdout · jitters</title>
   <meta name="description" content="Technical reference for the jitters CLI, JSON stdout, project files, style.json, and jitters.toml.">
-  <meta name="theme-color" content="#080c16">
+  <meta name="theme-color" content="#f4f1e8">
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./assets/site.css">
 </head>
-<body>
-  <a class="skip" href="#main">Skip to content</a>
-  <header class="top">
-    <a class="wordmark" href="./index.html">jitt<span>ers</span></a>
-    <input type="checkbox" id="nav-toggle">
-    <label class="nav-btn" for="nav-toggle">Menu</label>
-    <nav>
-      <a href="./tutorial.html">Tutorial</a>
-      <a href="./how-to.html">How-to</a>
-      <a href="./reference.html" aria-current="page">Reference</a>
-      <a href="./explanation.html">Explanation</a>
-      <a class="gh" href="https://github.com/josevelaz/jitters">GitHub</a>
-    </nav>
+<body class="site page page--reference">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="brand" href="./index.html">
+        <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="4" fill="#F4F1E8"/><rect x="4" y="5" width="24" height="22" rx="3" fill="#151718"/><rect x="7" y="8" width="18" height="16" rx="1" fill="#1748D2"/><path d="M14 11v11l3.2-3 2.5 5 2.4-1.2-2.5-4.8H24L14 11Z" fill="#FFFDF7"/></svg>
+        <span class="brand__name">jitters</span>
+        <span class="brand__section">Docs</span>
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav"><span>Menu</span></button>
+      <nav id="site-nav" class="site-nav" aria-label="Primary">
+        <ul class="site-nav__list">
+          <li><a href="./tutorial.html">Tutorial</a></li>
+          <li><a href="./how-to.html">How-to</a></li>
+          <li><a href="./reference.html" aria-current="page">Reference</a></li>
+          <li><a href="./explanation.html">Explanation</a></li>
+          <li><a class="site-nav__source" href="https://github.com/josevelaz/jitters">GitHub</a></li>
+        </ul>
+      </nav>
+    </div>
   </header>
 
-  <div class="wrap layout">
-    <aside class="toc">
-      <p>Reference</p>
-      <a href="#commands">Commands</a>
-      <a href="#flags">Flags</a>
-      <a href="#stdout">Stdout JSON</a>
-      <a href="#project">Project files</a>
-      <a href="#style">style.json</a>
-      <a href="#toml">jitters.toml</a>
-      <a href="#env">Environment</a>
-      <a href="#stop">Stop conditions</a>
+  <main id="main" class="docs-shell">
+    <aside class="section-rail">
+      <details class="section-nav" open>
+        <summary>On this page</summary>
+        <nav aria-label="On this page">
+          <ol class="section-nav__list">
+            <li><a href="#commands">Commands</a></li>
+            <li><a href="#flags">Flags</a></li>
+            <li><a href="#stdout">Stdout JSON</a></li>
+            <li><a href="#project">Project files</a></li>
+            <li><a href="#style">style.json</a></li>
+            <li><a href="#toml">jitters.toml</a></li>
+            <li><a href="#env">Environment</a></li>
+            <li><a href="#stop">Stop conditions</a></li>
+          </ol>
+        </nav>
+      </details>
     </aside>
-    <main id="main" class="prose">
-      <p class="kicker">Reference</p>
-      <h1>Machinery</h1>
-      <p>Values below match the current CLI. Flags override user config. User config is not merged across files.</p>
 
-      <h2 id="commands">Commands</h2>
-      <table>
-        <thead><tr><th>Invocation</th><th>What it does</th></tr></thead>
-        <tbody>
-          <tr><td><code>jitters [options] &lt;prompt&gt;</code></td><td>Capture, then composite. Needs provider auth, <code>agent-browser</code>, and <code>ffmpeg</code>.</td></tr>
-          <tr><td><code>jitters render &lt;project&gt; [options]</code></td><td>Recomposite an existing <code>*.jitters</code> directory. Needs <code>ffmpeg</code> only.</td></tr>
-          <tr><td><code>jitters config</code></td><td>Print JSON for the active config file (<code>path</code>, <code>source</code>, resolved values).</td></tr>
-          <tr><td><code>jitters config --skill</code></td><td>Print the config-editing skill to stdout.</td></tr>
-          <tr><td><code>jitters --help</code></td><td>Print usage. No deps required.</td></tr>
-        </tbody>
-      </table>
+        <header class="page-header">
+          <p class="eyebrow">Reference</p>
+          <h1>CLI and project reference</h1>
+          <p class="page-lede">Values below match the current CLI. Flags override user config. User config is not merged across files.</p>
+        </header>
 
-      <h2 id="flags">Flags</h2>
-      <table>
-        <thead><tr><th>Flag</th><th>Meaning</th></tr></thead>
-        <tbody>
-          <tr><td><code>--url &lt;url&gt;</code></td><td>Starting URL. Also added to the closed URL candidate set.</td></tr>
-          <tr><td><code>--out &lt;path&gt;</code></td><td>Output MP4 file, or a directory. Default: <code>&lt;slug&gt;.mp4</code> next to <code>&lt;slug&gt;.jitters/</code> in cwd. A directory puts both under that directory.</td></tr>
-          <tr><td><code>--project &lt;name&gt;</code></td><td>Project slug. Default: derived from the prompt (max 60 filesystem-safe characters).</td></tr>
-          <tr><td><code>--style &lt;path&gt;</code></td><td>Replace the project style for this export.</td></tr>
-          <tr><td><code>--max-steps &lt;n&gt;</code></td><td>Max agent steps. Default 20, cap 40. Integers ≥ 1.</td></tr>
-          <tr><td><code>--provider &lt;id&gt;</code></td><td><code>typesafe</code> (default), <code>vercel</code>, <code>openrouter</code>, or <code>cloudflare</code>. Aliases include <code>jev</code>, <code>ai-gateway</code>, <code>cf</code>.</td></tr>
-          <tr><td><code>--model &lt;id&gt;</code></td><td>Model for the selected provider. Gateway default <code>openai/gpt-4o-mini</code>.</td></tr>
-          <tr><td><code>--format &lt;WxH&gt;</code></td><td>Export size override. Also accepts <code>720p</code>, <code>1080p</code>, <code>4k</code>.</td></tr>
-          <tr><td><code>--bg &lt;color&gt;</code></td><td>Background override for one export.</td></tr>
-        </tbody>
-      </table>
-      <p>Unknown flags fail. Capture without a prompt prints help and exits nonzero.</p>
+        <div class="doc-flow">
+        <section id="commands" class="doc-section">
+          <h2><span class="ref-index">R.01</span> Commands</h2>
+          <div class="table-scroll" tabindex="0" role="region" aria-label="CLI commands">
+            <table>
+              <caption class="sr-only">CLI commands</caption>
+              <thead><tr><th>Invocation</th><th>What it does</th></tr></thead>
+              <tbody>
+                <tr><td><code>jitters [options] &lt;prompt&gt;</code></td><td>Capture, then composite. Needs provider auth, <code>agent-browser</code>, and <code>ffmpeg</code>.</td></tr>
+                <tr><td><code>jitters render &lt;project&gt; [options]</code></td><td>Recomposite an existing <code>*.jitters</code> directory. Needs <code>ffmpeg</code> only.</td></tr>
+                <tr><td><code>jitters config</code></td><td>Print JSON for the active config file (<code>path</code>, <code>source</code>, resolved values).</td></tr>
+                <tr><td><code>jitters config --skill</code></td><td>Print the config-editing skill to stdout.</td></tr>
+                <tr><td><code>jitters --help</code></td><td>Print usage. No deps required.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-      <h2 id="stdout">Stdout JSON</h2>
-      <p>One JSON object, then a newline. Logs go to stderr.</p>
-<pre><code>{
+        <section id="flags" class="doc-section">
+          <h2><span class="ref-index">R.02</span> Flags</h2>
+          <div class="table-scroll" tabindex="0" role="region" aria-label="CLI flags">
+            <table>
+              <caption class="sr-only">CLI flags</caption>
+              <thead><tr><th>Flag</th><th>Meaning</th></tr></thead>
+              <tbody>
+                <tr><td><code>--url &lt;url&gt;</code></td><td>Starting URL. Also added to the closed URL candidate set.</td></tr>
+                <tr><td><code>--out &lt;path&gt;</code></td><td>Output MP4 file, or a directory. Default: <code>&lt;slug&gt;.mp4</code> next to <code>&lt;slug&gt;.jitters/</code> in cwd. A directory puts both under that directory.</td></tr>
+                <tr><td><code>--project &lt;name&gt;</code></td><td>Project slug. Default: derived from the prompt (max 60 filesystem-safe characters).</td></tr>
+                <tr><td><code>--style &lt;path&gt;</code></td><td>Replace the project style for this export.</td></tr>
+                <tr><td><code>--max-steps &lt;n&gt;</code></td><td>Max agent steps. Default 20, cap 40. Integers ≥ 1.</td></tr>
+                <tr><td><code>--provider &lt;id&gt;</code></td><td><code>typesafe</code> (default), <code>vercel</code>, <code>openrouter</code>, or <code>cloudflare</code>. Aliases include <code>jev</code>, <code>ai-gateway</code>, <code>cf</code>.</td></tr>
+                <tr><td><code>--model &lt;id&gt;</code></td><td>Model for the selected provider. Gateway default <code>openai/gpt-4o-mini</code>.</td></tr>
+                <tr><td><code>--format &lt;WxH&gt;</code></td><td>Export size override. Also accepts <code>720p</code>, <code>1080p</code>, <code>4k</code>.</td></tr>
+                <tr><td><code>--bg &lt;color&gt;</code></td><td>Background override for one export.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Unknown flags fail. Capture without a prompt prints help and exits nonzero.</p>
+        </section>
+
+        <section id="stdout" class="doc-section">
+          <h2><span class="ref-index">R.03</span> Stdout JSON</h2>
+          <p>One JSON object, then a newline. Logs go to stderr.</p>
+          <div class="code-block">
+            <div class="code-block__bar">
+              <span class="code-block__language">json</span>
+              <button class="copy-button" type="button" data-copy><span class="copy-button__label">Copy</span></button>
+            </div>
+            <pre tabindex="0" aria-label="Stdout JSON shape"><code>{
   "status": "done",
   "out": "/abs/demo.mp4",
   "project": "/abs/demo.jitters",
   "durationMs": 12345,
   "steps": []
 }</code></pre>
-      <table>
-        <thead><tr><th>status</th><th>Exit</th><th>Meaning</th></tr></thead>
-        <tbody>
-          <tr><td><code>done</code></td><td>0</td><td>Task complete, finish, or a closed-set <code>none</code> / already-visited stop.</td></tr>
-          <tr><td><code>stuck</code></td><td>0</td><td>Three identical actions in a row. Still exports whatever was captured.</td></tr>
-          <tr><td><code>max_steps</code></td><td>0</td><td>Hit <code>--max-steps</code>. Still exports.</td></tr>
-          <tr><td><code>error</code></td><td>1</td><td>Failure. <code>error</code> string is set. May still include <code>out</code> / <code>project</code> if artifacts exist.</td></tr>
-        </tbody>
-      </table>
-      <p><code>steps</code> is an array of <code>{ index, action, target?, value?, url?, note? }</code>.</p>
+            <span class="sr-only" data-copy-status role="status" aria-live="polite"></span>
+          </div>
+          <div class="table-scroll" tabindex="0" role="region" aria-label="Status values">
+            <table>
+              <caption class="sr-only">Run status values</caption>
+              <thead><tr><th>status</th><th>Exit</th><th>Meaning</th></tr></thead>
+              <tbody>
+                <tr><td class="status-ok"><code>done</code></td><td>0</td><td>Task complete, finish, or a closed-set <code>none</code> / already-visited stop.</td></tr>
+                <tr><td class="status-ok"><code>stuck</code></td><td>0</td><td>Three identical actions in a row. Still exports whatever was captured.</td></tr>
+                <tr><td class="status-ok"><code>max_steps</code></td><td>0</td><td>Hit <code>--max-steps</code>. Still exports.</td></tr>
+                <tr><td class="status-bad"><code>error</code></td><td>1</td><td>Failure. <code>error</code> string is set. May still include <code>out</code> / <code>project</code> if artifacts exist.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><code>steps</code> is an array of <code>{ index, action, target?, value?, url?, note? }</code>.</p>
+        </section>
 
-      <h2 id="project">Project files</h2>
-      <p>Capture writes <code>&lt;slug&gt;.mp4</code> plus:</p>
-      <table>
-        <thead><tr><th>File</th><th>Contents</th></tr></thead>
-        <tbody>
-          <tr><td><code>capture.mp4</code></td><td>Page pixels at 60 fps. No pointer, no ripples. Viewport 1440×900.</td></tr>
-          <tr><td><code>cursor.json</code></td><td>Array of <code>{ tMs, x, y, button? }</code>. Dense samples; curves are many points, not two endpoints.</td></tr>
-          <tr><td><code>timeline.json</code></td><td>Semantic events <code>{ tMs, kind, box?, ref?, value?, url? }</code> for zooms. Not the cursor path.</td></tr>
-          <tr><td><code>style.json</code></td><td>Compositor tokens for this take.</td></tr>
-        </tbody>
-      </table>
+        <section id="project" class="doc-section">
+          <h2><span class="ref-index">R.04</span> Project files</h2>
+          <p>Capture writes <code>&lt;slug&gt;.mp4</code> plus:</p>
+          <div class="table-scroll" tabindex="0" role="region" aria-label="Project files">
+            <table>
+              <caption class="sr-only">Files in a jitters project directory</caption>
+              <thead><tr><th>File</th><th>Contents</th></tr></thead>
+              <tbody>
+                <tr><td><code>capture.mp4</code></td><td>Page pixels at 60 fps. No pointer, no ripples. Viewport 1440×900.</td></tr>
+                <tr><td><code>cursor.json</code></td><td>Array of <code>{ tMs, x, y, button? }</code>. Dense samples; curves are many points, not two endpoints.</td></tr>
+                <tr><td><code>timeline.json</code></td><td>Semantic events <code>{ tMs, kind, box?, ref?, value?, url? }</code> for zooms. Not the cursor path.</td></tr>
+                <tr><td><code>style.json</code></td><td>Compositor tokens for this take.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-      <h2 id="style">Default style.json</h2>
-<pre><code>{
+        <section id="style" class="doc-section">
+          <h2><span class="ref-index">R.05</span> Default style.json</h2>
+          <div class="code-block">
+            <div class="code-block__bar">
+              <span class="code-block__language">json</span>
+              <button class="copy-button" type="button" data-copy><span class="copy-button__label">Copy</span></button>
+            </div>
+            <pre tabindex="0" aria-label="Default style.json"><code>{
   "canvas": { "width": 1920, "height": 1080 },
   "padding": 24,
   "radius": 16,
@@ -139,58 +188,95 @@
     "cursor": true
   }
 }</code></pre>
-      <p>Zoom is skipped when the target box covers more than <code>skipAbove</code> of the viewport (default 40%). Cursor path tension must not collapse loops: the compositor fits a cubic Bézier through the sampled track (Catmull-Rom → Bézier). Ripples come from button-down samples, not from timeline clicks.</p>
+            <span class="sr-only" data-copy-status role="status" aria-live="polite"></span>
+          </div>
+          <p>Zoom is skipped when the target box covers more than <code>skipAbove</code> of the viewport (default 40%). Cursor path tension must not collapse loops: the compositor fits a cubic Bézier through the sampled track (Catmull-Rom → Bézier). Ripples come from button-down samples, not from timeline clicks.</p>
+        </section>
 
-      <h2 id="toml">jitters.toml keys</h2>
-      <table>
-        <thead><tr><th>Key</th><th>Flag</th></tr></thead>
-        <tbody>
-          <tr><td><code>url</code></td><td><code>--url</code></td></tr>
-          <tr><td><code>out</code></td><td><code>--out</code></td></tr>
-          <tr><td><code>project</code></td><td><code>--project</code></td></tr>
-          <tr><td><code>style</code> (string path)</td><td><code>--style</code></td></tr>
-          <tr><td><code>max_steps</code></td><td><code>--max-steps</code></td></tr>
-          <tr><td><code>provider</code></td><td><code>--provider</code></td></tr>
-          <tr><td><code>model</code></td><td><code>--model</code></td></tr>
-          <tr><td><code>cloudflare_account_id</code></td><td>(env <code>CLOUDFLARE_ACCOUNT_ID</code>)</td></tr>
-          <tr><td><code>cloudflare_gateway</code></td><td>(env <code>CLOUDFLARE_AI_GATEWAY_ID</code>)</td></tr>
-          <tr><td><code>format</code></td><td><code>--format</code></td></tr>
-          <tr><td><code>bg</code></td><td><code>--bg</code></td></tr>
-        </tbody>
-      </table>
-      <p>A <code>[style]</code> table is merged onto built-in tokens for new captures. Snake_case aliases (<code>max_steps</code>, <code>in_ms</code>, <code>motion_blur</code>) are accepted. Omit a key to keep the built-in.</p>
+        <section id="toml" class="doc-section">
+          <h2><span class="ref-index">R.06</span> jitters.toml keys</h2>
+          <div class="table-scroll" tabindex="0" role="region" aria-label="jitters.toml keys">
+            <table>
+              <caption class="sr-only">Config keys and matching flags</caption>
+              <thead><tr><th>Key</th><th>Flag</th></tr></thead>
+              <tbody>
+                <tr><td><code>url</code></td><td><code>--url</code></td></tr>
+                <tr><td><code>out</code></td><td><code>--out</code></td></tr>
+                <tr><td><code>project</code></td><td><code>--project</code></td></tr>
+                <tr><td><code>style</code> (string path)</td><td><code>--style</code></td></tr>
+                <tr><td><code>max_steps</code></td><td><code>--max-steps</code></td></tr>
+                <tr><td><code>provider</code></td><td><code>--provider</code></td></tr>
+                <tr><td><code>model</code></td><td><code>--model</code></td></tr>
+                <tr><td><code>cloudflare_account_id</code></td><td>(env <code>CLOUDFLARE_ACCOUNT_ID</code>)</td></tr>
+                <tr><td><code>cloudflare_gateway</code></td><td>(env <code>CLOUDFLARE_AI_GATEWAY_ID</code>)</td></tr>
+                <tr><td><code>format</code></td><td><code>--format</code></td></tr>
+                <tr><td><code>bg</code></td><td><code>--bg</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>A <code>[style]</code> table is merged onto built-in tokens for new captures. Snake_case aliases (<code>max_steps</code>, <code>in_ms</code>, <code>motion_blur</code>) are accepted. Omit a key to keep the built-in.</p>
+        </section>
 
-      <h2 id="env">Environment</h2>
-      <table>
-        <thead><tr><th>Variable</th><th>Used by</th></tr></thead>
-        <tbody>
-          <tr><td><code>TYPESAFE_API_KEY</code></td><td><code>typesafe</code></td></tr>
-          <tr><td><code>AI_GATEWAY_API_KEY</code> / <code>VERCEL_OIDC_TOKEN</code></td><td><code>vercel</code></td></tr>
-          <tr><td><code>OPENROUTER_API_KEY</code></td><td><code>openrouter</code></td></tr>
-          <tr><td><code>CLOUDFLARE_API_TOKEN</code></td><td><code>cloudflare</code> (aliases <code>CF_API_TOKEN</code>, <code>CLOUDFLARE_AIG_TOKEN</code>)</td></tr>
-          <tr><td><code>CLOUDFLARE_ACCOUNT_ID</code></td><td><code>cloudflare</code> (alias <code>CF_ACCOUNT_ID</code>)</td></tr>
-          <tr><td><code>CLOUDFLARE_AI_GATEWAY_ID</code></td><td>optional, default <code>default</code></td></tr>
-          <tr><td><code>XDG_CONFIG_HOME</code></td><td>config file location</td></tr>
-        </tbody>
-      </table>
+        <section id="env" class="doc-section">
+          <h2><span class="ref-index">R.07</span> Environment</h2>
+          <div class="table-scroll" tabindex="0" role="region" aria-label="Environment variables">
+            <table>
+              <caption class="sr-only">Environment variables</caption>
+              <thead><tr><th>Variable</th><th>Used by</th></tr></thead>
+              <tbody>
+                <tr><td><code>TYPESAFE_API_KEY</code></td><td><code>typesafe</code></td></tr>
+                <tr><td><code>AI_GATEWAY_API_KEY</code> / <code>VERCEL_OIDC_TOKEN</code></td><td><code>vercel</code></td></tr>
+                <tr><td><code>OPENROUTER_API_KEY</code></td><td><code>openrouter</code></td></tr>
+                <tr><td><code>CLOUDFLARE_API_TOKEN</code></td><td><code>cloudflare</code> (aliases <code>CF_API_TOKEN</code>, <code>CLOUDFLARE_AIG_TOKEN</code>)</td></tr>
+                <tr><td><code>CLOUDFLARE_ACCOUNT_ID</code></td><td><code>cloudflare</code> (alias <code>CF_ACCOUNT_ID</code>)</td></tr>
+                <tr><td><code>CLOUDFLARE_AI_GATEWAY_ID</code></td><td>optional, default <code>default</code></td></tr>
+                <tr><td><code>XDG_CONFIG_HOME</code></td><td>config file location</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-      <h2 id="stop">Agent stop conditions</h2>
-      <ul>
-        <li><code>task_complete</code> noul ≥ 0.7</li>
-        <li><code>next_action</code> is <code>finish</code> (or unrecognized)</li>
-        <li><code>type</code> / <code>navigate</code> / <code>click</code> with choice <code>none</code>, or a value outside the closed set</li>
-        <li>Navigate to a URL already visited this run, or click a ref already clicked</li>
-        <li>Three identical history entries</li>
-        <li><code>--max-steps</code> reached</li>
-      </ul>
-      <p>Page snapshot, title, and body text travel in request <code>state</code> only. They are never concatenated into question instructions. After the last action, capture holds long enough for the zoom envelope (in + hold + out) to play out.</p>
-    </main>
-  </div>
+        <section id="stop" class="doc-section">
+          <h2><span class="ref-index">R.08</span> Agent stop conditions</h2>
+          <ul>
+            <li><code>task_complete</code> noul ≥ 0.7</li>
+            <li><code>next_action</code> is <code>finish</code> (or unrecognized)</li>
+            <li><code>type</code> / <code>navigate</code> / <code>click</code> with choice <code>none</code>, or a value outside the closed set</li>
+            <li>Navigate to a URL already visited this run, or click a ref already clicked</li>
+            <li>Three identical history entries</li>
+            <li><code>--max-steps</code> reached</li>
+          </ul>
+          <p>Page snapshot, title, and body text travel in request <code>state</code> only. They are never concatenated into question instructions. After the last action, capture holds long enough for the zoom envelope (in + hold + out) to play out.</p>
+        </section>
+        </div>
+  </main>
 
-  <footer class="foot">
-    <span>jitters · prompt in, MP4 out</span>
-    <span><a href="./explanation.html">Why it is split this way</a></span>
+  <nav class="page-next" aria-label="Documentation pagination">
+    <a class="page-next__item page-next__item--previous" href="./how-to.html">
+      <span class="page-next__dir">Previous</span>
+      <span>Recipes for the next cut</span>
+    </a>
+    <a class="page-next__item page-next__item--next" href="./explanation.html">
+      <span class="page-next__dir">Next</span>
+      <span>A take, then a grade</span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <div>
+        <span class="site-footer__brand">jitters</span>
+        <span class="site-footer__tag">Prompt in. MP4 out.</span>
+      </div>
+      <nav aria-label="Footer">
+        <a href="./tutorial.html">Tutorial</a>
+        <a href="./how-to.html">How-to</a>
+        <a href="./reference.html">Reference</a>
+        <a href="./explanation.html">Explanation</a>
+        <a href="https://github.com/josevelaz/jitters">Source</a>
+      </nav>
+    </div>
   </footer>
-  <script src="./assets/site.js"></script>
+  <script defer src="./assets/site.js"></script>
 </body>
 </html>

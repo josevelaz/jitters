@@ -5,82 +5,174 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>How-to — Restyle, providers, and config · jitters</title>
   <meta name="description" content="Recipes for restyling a jitters take, quoting type-in text, switching AI providers, and setting jitters.toml defaults.">
-  <meta name="theme-color" content="#080c16">
+  <meta name="theme-color" content="#f4f1e8">
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./assets/site.css">
 </head>
-<body>
-  <a class="skip" href="#main">Skip to content</a>
-  <header class="top">
-    <a class="wordmark" href="./index.html">jitt<span>ers</span></a>
-    <input type="checkbox" id="nav-toggle">
-    <label class="nav-btn" for="nav-toggle">Menu</label>
-    <nav>
-      <a href="./tutorial.html">Tutorial</a>
-      <a href="./how-to.html" aria-current="page">How-to</a>
-      <a href="./reference.html">Reference</a>
-      <a href="./explanation.html">Explanation</a>
-      <a class="gh" href="https://github.com/josevelaz/jitters">GitHub</a>
-    </nav>
+<body class="site page page--how-to">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="brand" href="./index.html">
+        <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="4" fill="#F4F1E8"/><rect x="4" y="5" width="24" height="22" rx="3" fill="#151718"/><rect x="7" y="8" width="18" height="16" rx="1" fill="#1748D2"/><path d="M14 11v11l3.2-3 2.5 5 2.4-1.2-2.5-4.8H24L14 11Z" fill="#FFFDF7"/></svg>
+        <span class="brand__name">jitters</span>
+        <span class="brand__section">Docs</span>
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav"><span>Menu</span></button>
+      <nav id="site-nav" class="site-nav" aria-label="Primary">
+        <ul class="site-nav__list">
+          <li><a href="./tutorial.html">Tutorial</a></li>
+          <li><a href="./how-to.html" aria-current="page">How-to</a></li>
+          <li><a href="./reference.html">Reference</a></li>
+          <li><a href="./explanation.html">Explanation</a></li>
+          <li><a class="site-nav__source" href="https://github.com/josevelaz/jitters">GitHub</a></li>
+        </ul>
+      </nav>
+    </div>
   </header>
 
-  <div class="wrap layout">
-    <aside class="toc">
-      <p>Recipes</p>
-      <a href="#quote">Quote type-in text</a>
-      <a href="#restyle">Restyle without Chrome</a>
-      <a href="#providers">Switch providers</a>
-      <a href="#config">Set defaults</a>
-      <a href="#agents">Use it from an agent</a>
+  <main id="main" class="docs-shell">
+    <aside class="section-rail">
+      <details class="section-nav" open>
+        <summary>On this page</summary>
+        <nav aria-label="On this page">
+          <ol class="section-nav__list">
+            <li><a href="#quote">Quote type-in text</a></li>
+            <li><a href="#restyle">Restyle without Chrome</a></li>
+            <li><a href="#providers">Switch providers</a></li>
+            <li><a href="#config">Set defaults</a></li>
+            <li><a href="#agents">Use it from an agent</a></li>
+          </ol>
+        </nav>
+      </details>
     </aside>
-    <main id="main" class="prose">
-      <p class="kicker">How-to</p>
-      <h1>Solve a specific job</h1>
-      <p>Each recipe assumes you can already run <code>node dist/cli.js --help</code>. Swap that for <code>jitters</code> if the binary is on your <code>PATH</code>.</p>
 
-      <h2 id="quote">Quote the text the agent should type</h2>
-      <p>The loop never invents copy. It only types strings extracted from the prompt (quoted text, or phrases after “search for” / “type” / “enter”).</p>
-<pre><code>node dist/cli.js "type 'hello@example.com' into the email field and submit" --url https://example.com</code></pre>
-      <p>If you need a URL in the closed set, put the <code>https://…</code> in the prompt or pass <code>--url</code>.</p>
-      <p class="callout warn">If the model chooses <code>type</code> or <code>navigate</code> but the matching choice is <code>none</code>, jitters finishes instead of fabricating a string or URL.</p>
+        <header class="page-header">
+          <p class="eyebrow">How-to</p>
+          <h1>Recipes for the next cut</h1>
+          <p class="page-lede">Each recipe assumes you can already run <code>node dist/cli.js --help</code>. Swap that for <code>jitters</code> if the binary is on your <code>PATH</code>.</p>
+        </header>
 
-      <h2 id="restyle">Restyle a take without recapturing</h2>
-      <p>Use this when the story is right and only the look should change.</p>
-      <ol>
-        <li>Edit <code>&lt;slug&gt;.jitters/style.json</code>. Typical knobs: <code>cursor.size</code>, <code>zoom.scale</code>, <code>motionBlur.samples</code>, <code>padding</code>, <code>background</code>.</li>
-        <li>Recomposite:</li>
-      </ol>
-<pre><code>node dist/cli.js render ./demo.jitters
+        <div class="doc-flow">
+        <ol class="recipe-index">
+          <li><a href="#quote"><span>01</span><span>Quote type-in text</span><span>exact input</span></a></li>
+          <li><a href="#restyle"><span>02</span><span>Restyle without Chrome</span><span>another export</span></a></li>
+          <li><a href="#providers"><span>03</span><span>Switch providers</span><span>backend change</span></a></li>
+          <li><a href="#config"><span>04</span><span>Set defaults</span><span>persistent config</span></a></li>
+          <li><a href="#agents"><span>05</span><span>Use it from an agent</span><span>machine-readable flow</span></a></li>
+        </ol>
+
+        <section id="quote" class="doc-section recipe">
+          <header class="recipe__header">
+            <p class="recipe__label">01 / Input</p>
+            <h2>Quote the text the agent should type</h2>
+            <p class="recipe__when">Use this when the demo must type exact copy the model is not allowed to invent.</p>
+          </header>
+          <div class="recipe__body">
+            <p>The loop never invents copy. It only types strings extracted from the prompt (quoted text, or phrases after “search for” / “type” / “enter”).</p>
+            <div class="code-block">
+              <div class="code-block__bar">
+                <span class="code-block__language">shell</span>
+                <button class="copy-button" type="button" data-copy><span class="copy-button__label">Copy</span></button>
+              </div>
+              <pre tabindex="0" aria-label="Quote type-in text"><code>node dist/cli.js "type 'hello@example.com' into the email field and submit" --url https://example.com</code></pre>
+              <span class="sr-only" data-copy-status role="status" aria-live="polite"></span>
+            </div>
+            <p>If you need a URL in the closed set, put the <code>https://…</code> in the prompt or pass <code>--url</code>.</p>
+            <aside class="notice notice--warning">
+              <p class="notice__label">Warning</p>
+              <div class="notice__body">If the model chooses <code>type</code> or <code>navigate</code> but the matching choice is <code>none</code>, jitters finishes instead of fabricating a string or URL.</div>
+            </aside>
+          </div>
+        </section>
+
+        <section id="restyle" class="doc-section recipe">
+          <header class="recipe__header">
+            <p class="recipe__label">02 / Finish</p>
+            <h2>Restyle a take without recapturing</h2>
+            <p class="recipe__when">Use this when the story is right and only the look should change.</p>
+          </header>
+          <div class="recipe__body">
+            <ol>
+              <li>Edit <code>&lt;slug&gt;.jitters/style.json</code>. Typical knobs: <code>cursor.size</code>, <code>zoom.scale</code>, <code>motionBlur.samples</code>, <code>padding</code>, <code>background</code>.</li>
+              <li>Recomposite:</li>
+            </ol>
+            <div class="code-block">
+              <div class="code-block__bar">
+                <span class="code-block__language">shell</span>
+                <button class="copy-button" type="button" data-copy><span class="copy-button__label">Copy</span></button>
+              </div>
+              <pre tabindex="0" aria-label="Render commands"><code>node dist/cli.js render ./demo.jitters
 node dist/cli.js render ./demo.jitters --style ./custom.json --format 1280x720 --bg "#111111" --out ./demo-v2.mp4</code></pre>
-      <p><code>--style</code> replaces the style file for that export. <code>--format</code> and <code>--bg</code> override one export. Chrome is not launched. Render only needs <code>ffmpeg</code>.</p>
-      <p>Recapture only if the page footage or the mouse track must change.</p>
+              <span class="sr-only" data-copy-status role="status" aria-live="polite"></span>
+            </div>
+            <p><code>--style</code> replaces the style file for that export. <code>--format</code> and <code>--bg</code> override one export. Chrome is not launched. Render only needs <code>ffmpeg</code>.</p>
+            <p>Recapture only if the page footage or the mouse track must change.</p>
+          </div>
+        </section>
 
-      <h2 id="providers">Switch the judgment provider</h2>
-      <p>The step loop is the same for every backend. Only the client changes.</p>
-<pre><code>node dist/cli.js "show the signup flow" --url https://example.com --provider openrouter
+        <section id="providers" class="doc-section recipe">
+          <header class="recipe__header">
+            <p class="recipe__label">03 / Backend</p>
+            <h2>Switch the judgment provider</h2>
+            <p class="recipe__when">Use this when you want the same step loop on a different API.</p>
+          </header>
+          <div class="recipe__body">
+            <p>The step loop is the same for every backend. Only the client changes.</p>
+            <div class="code-block">
+              <div class="code-block__bar">
+                <span class="code-block__language">shell</span>
+                <button class="copy-button" type="button" data-copy><span class="copy-button__label">Copy</span></button>
+              </div>
+              <pre tabindex="0" aria-label="Provider examples"><code>node dist/cli.js "show the signup flow" --url https://example.com --provider openrouter
 node dist/cli.js "show the signup flow" --url https://example.com --provider vercel --model openai/gpt-4o-mini
 node dist/cli.js "show the signup flow" --url https://example.com --provider cloudflare --model openai/gpt-4o-mini</code></pre>
-      <table>
-        <thead>
-          <tr><th>Provider</th><th>Environment</th></tr>
-        </thead>
-        <tbody>
-          <tr><td><code>typesafe</code> (default)</td><td><code>TYPESAFE_API_KEY</code></td></tr>
-          <tr><td><code>vercel</code></td><td><code>AI_GATEWAY_API_KEY</code> or <code>VERCEL_OIDC_TOKEN</code></td></tr>
-          <tr><td><code>openrouter</code></td><td><code>OPENROUTER_API_KEY</code></td></tr>
-          <tr><td><code>cloudflare</code></td><td><code>CLOUDFLARE_API_TOKEN</code> and <code>CLOUDFLARE_ACCOUNT_ID</code></td></tr>
-        </tbody>
-      </table>
-      <p>Gateway providers default to model <code>openai/gpt-4o-mini</code> unless you pass <code>--model</code>. TypeSafe uses the SDK default (<code>jev-latest</code>) unless <code>--model</code> is set. Optional Cloudflare gateway id: <code>CLOUDFLARE_AI_GATEWAY_ID</code> (default <code>default</code>), or <code>cloudflare_gateway</code> in config.</p>
+              <span class="sr-only" data-copy-status role="status" aria-live="polite"></span>
+            </div>
+            <div class="table-scroll" tabindex="0" role="region" aria-label="Judgment providers">
+              <table>
+                <caption class="sr-only">Judgment providers and environment variables</caption>
+                <thead>
+                  <tr><th>Provider</th><th>Environment</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>typesafe</code> (default)</td><td><code>TYPESAFE_API_KEY</code></td></tr>
+                  <tr><td><code>vercel</code></td><td><code>AI_GATEWAY_API_KEY</code> or <code>VERCEL_OIDC_TOKEN</code></td></tr>
+                  <tr><td><code>openrouter</code></td><td><code>OPENROUTER_API_KEY</code></td></tr>
+                  <tr><td><code>cloudflare</code></td><td><code>CLOUDFLARE_API_TOKEN</code> and <code>CLOUDFLARE_ACCOUNT_ID</code></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>Gateway providers default to model <code>openai/gpt-4o-mini</code> unless you pass <code>--model</code>. TypeSafe uses the SDK default (<code>jev-latest</code>) unless <code>--model</code> is set. Optional Cloudflare gateway id: <code>CLOUDFLARE_AI_GATEWAY_ID</code> (default <code>default</code>), or <code>cloudflare_gateway</code> in config.</p>
+          </div>
+        </section>
 
-      <h2 id="config">Set defaults in jitters.toml</h2>
-      <p>First existing file wins (not merged): <code>./jitters.toml</code>, then <code>$XDG_CONFIG_HOME/jitters/config.toml</code> (or <code>~/.config/jitters/config.toml</code>). Flags override the file.</p>
-<pre><code>node dist/cli.js config            # JSON: which file is active
+        <section id="config" class="doc-section recipe">
+          <header class="recipe__header">
+            <p class="recipe__label">04 / Defaults</p>
+            <h2>Set defaults in jitters.toml</h2>
+            <p class="recipe__when">Use this when flags you pass every run should live in a file instead.</p>
+          </header>
+          <div class="recipe__body">
+            <p>First existing file wins (not merged): <code>./jitters.toml</code>, then <code>$XDG_CONFIG_HOME/jitters/config.toml</code> (or <code>~/.config/jitters/config.toml</code>). Flags override the file.</p>
+            <div class="code-block">
+              <div class="code-block__bar">
+                <span class="code-block__language">shell</span>
+                <button class="copy-button" type="button" data-copy><span class="copy-button__label">Copy</span></button>
+              </div>
+              <pre tabindex="0" aria-label="Config commands"><code>node dist/cli.js config            # JSON: which file is active
 node dist/cli.js config --skill    # print the skill for editing that file</code></pre>
-<pre><code># url = "https://example.com"
+              <span class="sr-only" data-copy-status role="status" aria-live="polite"></span>
+            </div>
+            <div class="code-block">
+              <div class="code-block__bar">
+                <span class="code-block__language">toml</span>
+                <button class="copy-button" type="button" data-copy><span class="copy-button__label">Copy</span></button>
+              </div>
+              <pre tabindex="0" aria-label="Example jitters.toml"><code># url = "https://example.com"
 # max_steps = 20
 # format = "1920x1080"
 # provider = "typesafe"
@@ -91,17 +183,51 @@ scale = 1.6
 
 [style.cursor]
 size = 32</code></pre>
-      <p>A <code>[style]</code> table is copied into a new project’s <code>style.json</code> at capture. An existing <code>style.json</code> stays until recapture or <code>--style</code>. Never put API keys in the TOML file.</p>
+              <span class="sr-only" data-copy-status role="status" aria-live="polite"></span>
+            </div>
+            <p>A <code>[style]</code> table is copied into a new project’s <code>style.json</code> at capture. An existing <code>style.json</code> stays until recapture or <code>--style</code>. Never put API keys in the TOML file.</p>
+          </div>
+        </section>
 
-      <h2 id="agents">Use jitters from an agent</h2>
-      <p>Point the agent at <code>SKILL.md</code> in the repo. Capture once from the user prompt, parse stdout JSON, then edit <code>style.json</code> and run <code>render</code> for look changes. Keep keys and agent-browser state out of the video, stdout, and the repo.</p>
-    </main>
-  </div>
+        <section id="agents" class="doc-section recipe">
+          <header class="recipe__header">
+            <p class="recipe__label">05 / Automation</p>
+            <h2>Use jitters from an agent</h2>
+            <p class="recipe__when">Use this when another agent should capture once and restyle from JSON.</p>
+          </header>
+          <div class="recipe__body">
+            <p>Point the agent at <code>SKILL.md</code> in the repo. Capture once from the user prompt, parse stdout JSON, then edit <code>style.json</code> and run <code>render</code> for look changes. Keep keys and agent-browser state out of the video, stdout, and the repo.</p>
+          </div>
+        </section>
+        </div>
+  </main>
 
-  <footer class="foot">
-    <span>jitters · prompt in, MP4 out</span>
-    <span><a href="./reference.html">CLI reference</a></span>
+  <nav class="page-next" aria-label="Documentation pagination">
+    <a class="page-next__item page-next__item--previous" href="./tutorial.html">
+      <span class="page-next__dir">Previous</span>
+      <span>Capture your first demo</span>
+    </a>
+    <a class="page-next__item page-next__item--next" href="./reference.html">
+      <span class="page-next__dir">Next</span>
+      <span>CLI and project reference</span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <div>
+        <span class="site-footer__brand">jitters</span>
+        <span class="site-footer__tag">Prompt in. MP4 out.</span>
+      </div>
+      <nav aria-label="Footer">
+        <a href="./tutorial.html">Tutorial</a>
+        <a href="./how-to.html">How-to</a>
+        <a href="./reference.html">Reference</a>
+        <a href="./explanation.html">Explanation</a>
+        <a href="https://github.com/josevelaz/jitters">Source</a>
+      </nav>
+    </div>
   </footer>
-  <script src="./assets/site.js"></script>
+  <script defer src="./assets/site.js"></script>
 </body>
 </html>

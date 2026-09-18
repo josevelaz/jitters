@@ -5,89 +5,200 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>jitters — framed demo videos from a prompt</title>
   <meta name="description" content="jitters turns a natural-language prompt into a framed MP4: agent-driven browser capture, then a restylable studio composite.">
-  <meta name="theme-color" content="#080c16">
+  <meta name="theme-color" content="#f4f1e8">
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./assets/site.css">
 </head>
-<body>
-  <a class="skip" href="#main">Skip to content</a>
-  <header class="top">
-    <a class="wordmark" href="./index.html" aria-current="page">jitt<span>ers</span></a>
-    <input type="checkbox" id="nav-toggle">
-    <label class="nav-btn" for="nav-toggle">Menu</label>
-    <nav>
-      <a href="./tutorial.html">Tutorial</a>
-      <a href="./how-to.html">How-to</a>
-      <a href="./reference.html">Reference</a>
-      <a href="./explanation.html">Explanation</a>
-      <a class="gh" href="https://github.com/josevelaz/jitters">GitHub</a>
-    </nav>
+<body class="site page page--home">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="brand" href="./index.html" aria-current="page">
+        <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="4" fill="#F4F1E8"/><rect x="4" y="5" width="24" height="22" rx="3" fill="#151718"/><rect x="7" y="8" width="18" height="16" rx="1" fill="#1748D2"/><path d="M14 11v11l3.2-3 2.5 5 2.4-1.2-2.5-4.8H24L14 11Z" fill="#FFFDF7"/></svg>
+        <span class="brand__name">jitters</span>
+        <span class="brand__section">Docs</span>
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav"><span>Menu</span></button>
+      <nav id="site-nav" class="site-nav" aria-label="Primary">
+        <ul class="site-nav__list">
+          <li><a href="./tutorial.html">Tutorial</a></li>
+          <li><a href="./how-to.html">How-to</a></li>
+          <li><a href="./reference.html">Reference</a></li>
+          <li><a href="./explanation.html">Explanation</a></li>
+          <li><a class="site-nav__source" href="https://github.com/josevelaz/jitters">GitHub</a></li>
+        </ul>
+      </nav>
+    </div>
   </header>
 
-  <main id="main" class="wrap">
-    <section class="hero">
-      <div>
-        <p class="kicker">Prompt in · MP4 out</p>
-        <h1>A studio-framed demo from one sentence.</h1>
-        <p class="lede">jitters drives a real browser from a prompt, records page pixels, then composites a window, background, synthetic cursor, zooms, ripples, and motion blur. Capture once. Restyle forever.</p>
+  <main id="main">
+    <section class="home-hero site-container">
+      <div class="home-hero__copy">
+        <p class="eyebrow">Prompt → Capture → MP4</p>
+        <h1>Direct a browser demo. Finish it like a film.</h1>
+        <p class="page-lede">jitters drives a real browser from a prompt, records page pixels, then composites a window, background, synthetic cursor, zooms, ripples, and motion blur. Capture once. Restyle forever.</p>
+        <div class="hero-actions">
+          <a class="button button--primary" href="./tutorial.html">Capture your first demo</a>
+          <a href="./explanation.html#two-passes">See how the two passes work</a>
+        </div>
       </div>
-      <div class="studio" aria-hidden="true">
-        <div class="studio-window">
-          <div class="chrome"><i></i><i></i><i></i></div>
-          <div class="page-lines">
-            open https://example.com<br>
-            click “More information…”<br>
-            hold for zoom-out<br>
-            export 1920×1080
+      <figure class="demo-reel" data-demo>
+        <div class="demo-reel__slate">
+          <span>Composited output</span>
+          <span>1920 × 1080</span>
+        </div>
+        <div class="demo-reel__stage">
+          <div class="demo-window">
+            <div class="demo-window__bar" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div class="demo-window__page">
+              <h3>Example Domain</h3>
+              <p>This domain is for use in documentation examples.</p>
+              <span class="demo-target">More information…</span>
+            </div>
+            <svg class="demo-cursor" viewBox="0 0 24 28" aria-hidden="true" focusable="false">
+              <path fill="#FFFDF7" stroke="#151718" stroke-width="1.4" d="M3 2.2v20.6l5.1-4.9 3.9 8.4 3.7-1.7-3.9-8.3H21z"/>
+            </svg>
+            <span class="demo-ripple" aria-hidden="true"></span>
           </div>
-          <span class="ripple"></span>
-          <span class="cursor"></span>
+        </div>
+        <div class="demo-reel__timeline" aria-hidden="true">
+          <span class="timeline__label">Take 01</span>
+          <span class="timeline__track"><span class="timeline__playhead"></span></span>
+          <span class="timeline__time">00:06</span>
+        </div>
+        <figcaption>Page-only capture, then a synthetic cursor, smart zoom, and studio frame.</figcaption>
+        <button class="demo-replay js-only" type="button" data-demo-replay>Replay cursor</button>
+      </figure>
+    </section>
+
+    <section class="quick-run site-container section-block" aria-labelledby="quick-run-title">
+      <header class="section-intro">
+        <h2 id="quick-run-title">First cut</h2>
+        <p>From a built clone, after <code>pnpm install</code> and <code>pnpm build</code>. Stdout is JSON pointing at the MP4 and the project folder. Logs go to stderr so agents can parse the result.</p>
+      </header>
+      <div class="quick-run__grid">
+        <div class="code-block">
+          <div class="code-block__bar">
+            <span class="code-block__language">shell</span>
+            <button class="copy-button" type="button" data-copy><span class="copy-button__label">Copy</span></button>
+          </div>
+          <pre tabindex="0" aria-label="First capture command"><code>node dist/cli.js "Open https://example.com and click 'More information...'" --url https://example.com</code></pre>
+          <span class="sr-only" data-copy-status role="status" aria-live="polite"></span>
+        </div>
+        <div class="code-block">
+          <div class="code-block__bar">
+            <span class="code-block__language">json</span>
+            <button class="copy-button" type="button" data-copy><span class="copy-button__label">Copy</span></button>
+          </div>
+          <pre tabindex="0" aria-label="Example stdout JSON"><code>{ "status": "done", "out": "/abs/demo.mp4", "project": "/abs/demo.jitters", "durationMs": 12345, "steps": [] }</code></pre>
+          <span class="sr-only" data-copy-status role="status" aria-live="polite"></span>
         </div>
       </div>
     </section>
 
-    <h2>Start here</h2>
-    <p>From a clone of the repo, after <code>pnpm install</code> and <code>pnpm build</code>:</p>
-<pre><code>jitters "Open https://example.com and click 'More information...'" --url https://example.com</code></pre>
-    <p>Stdout is JSON pointing at the MP4 and the project folder. Logs go to stderr so agents can parse the result.</p>
-<pre><code>{ "status": "done", "out": "/abs/demo.mp4", "project": "/abs/demo.jitters", "durationMs": 12345, "steps": [] }</code></pre>
+    <section class="pipeline site-container section-block" aria-labelledby="pipeline-title">
+      <header class="section-intro">
+        <h2 id="pipeline-title">One take, two passes</h2>
+        <p>The same command looks like prompt-in / MP4-out. Underneath, capture performs the scene and render grades it.</p>
+      </header>
+      <ol class="pipeline__track">
+        <li><strong>Prompt</strong><span>Natural-language direction</span></li>
+        <li><strong>Capture</strong><span>Page pixels only</span></li>
+        <li><strong>Project</strong><span><code>*.jitters/</code> take folder</span></li>
+        <li><strong>Render</strong><span>Studio grade, no Chrome</span></li>
+        <li><strong>MP4</strong><span>Framed export</span></li>
+      </ol>
+    </section>
 
-    <div class="doors">
-      <a class="door" href="./tutorial.html">
-        <b>Tutorial</b>
-        <span>Capture your first framed demo end to end.</span>
-      </a>
-      <a class="door" href="./how-to.html">
-        <b>How-to</b>
-        <span>Restyle, switch providers, and set defaults.</span>
-      </a>
-      <a class="door" href="./reference.html">
-        <b>Reference</b>
-        <span>CLI flags, style.json, config.toml, stdout.</span>
-      </a>
-      <a class="door" href="./explanation.html">
-        <b>Explanation</b>
-        <span>Why capture and render are two different jobs.</span>
-      </a>
-    </div>
+    <section class="routes site-container section-block" aria-labelledby="routes-title">
+      <header class="section-intro">
+        <h2 id="routes-title">Choose your route</h2>
+      </header>
+      <ol class="route-list">
+        <li>
+          <a href="./tutorial.html">
+            <span class="route-index">01</span>
+            <span class="route-title">Capture your first demo</span>
+            <span class="route-kind">Tutorial</span>
+            <span class="route-copy">Learn by making one take.</span>
+            <span class="route-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+        <li>
+          <a href="./how-to.html">
+            <span class="route-index">02</span>
+            <span class="route-title">Change the finish</span>
+            <span class="route-kind">How-to</span>
+            <span class="route-copy">Restyle, configure, integrate.</span>
+            <span class="route-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+        <li>
+          <a href="./reference.html">
+            <span class="route-index">03</span>
+            <span class="route-title">Look up exact behavior</span>
+            <span class="route-kind">Reference</span>
+            <span class="route-copy">Flags, files, JSON, environment.</span>
+            <span class="route-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+        <li>
+          <a href="./explanation.html">
+            <span class="route-index">04</span>
+            <span class="route-title">Understand the pipeline</span>
+            <span class="route-kind">Explanation</span>
+            <span class="route-copy">Why capture and render split.</span>
+            <span class="route-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+      </ol>
+    </section>
 
-    <h2>What you need</h2>
-    <ul>
-      <li>Node.js, with the package built (<code>pnpm build</code>).</li>
-      <li><code>agent-browser</code> on <code>PATH</code>, with Chrome installed via <code>agent-browser install</code>.</li>
-      <li><code>ffmpeg</code> on <code>PATH</code>.</li>
-      <li>A provider API key in the environment — never in config, video, or stdout. TypeSafe is the default (<code>TYPESAFE_API_KEY</code>).</li>
-    </ul>
-    <p class="callout"><code>--help</code> works with none of those. Capture checks the selected provider key, <code>agent-browser</code>, and <code>ffmpeg</code>, then names whichever is missing. Render only needs <code>ffmpeg</code>.</p>
+    <section class="requirements site-container" aria-labelledby="requirements-title">
+      <div class="requirements__heading">
+        <h2 id="requirements-title">Before you roll</h2>
+        <p>Capture needs a judgment backend and two external binaries. Render is local.</p>
+      </div>
+      <div class="requirements__body">
+        <ul>
+          <li>Node.js, with the package built (<code>pnpm build</code>).</li>
+          <li><code>agent-browser</code> on <code>PATH</code>, with Chrome installed via <code>agent-browser install</code>.</li>
+          <li><code>ffmpeg</code> on <code>PATH</code>.</li>
+          <li>A provider API key in the environment — never in config, video, or stdout. TypeSafe is the default (<code>TYPESAFE_API_KEY</code>).</li>
+        </ul>
+        <aside class="notice notice--note">
+          <p class="notice__label">Note</p>
+          <div class="notice__body"><code>--help</code> works with none of those. Capture checks the selected provider key, <code>agent-browser</code>, and <code>ffmpeg</code>, then names whichever is missing. Render only needs <code>ffmpeg</code>.</div>
+        </aside>
+      </div>
+    </section>
   </main>
 
-  <footer class="foot">
-    <span>jitters · prompt in, MP4 out</span>
-    <span><a href="https://github.com/josevelaz/jitters">Source</a></span>
+  <nav class="page-next" aria-label="Documentation pagination">
+    <a class="page-next__item page-next__item--next page-next__item--span" href="./tutorial.html">
+      <span class="page-next__dir">Next</span>
+      <span>Capture your first demo</span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <div>
+        <span class="site-footer__brand">jitters</span>
+        <span class="site-footer__tag">Prompt in. MP4 out.</span>
+      </div>
+      <nav aria-label="Footer">
+        <a href="./tutorial.html">Tutorial</a>
+        <a href="./how-to.html">How-to</a>
+        <a href="./reference.html">Reference</a>
+        <a href="./explanation.html">Explanation</a>
+        <a href="https://github.com/josevelaz/jitters">Source</a>
+      </nav>
+    </div>
   </footer>
-  <script src="./assets/site.js"></script>
+  <script defer src="./assets/site.js"></script>
 </body>
 </html>
