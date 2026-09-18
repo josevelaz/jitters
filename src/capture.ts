@@ -10,6 +10,8 @@
  * - `<slug>.studio/cursor.json` — every sampled mouse position/button
  *   `{ tMs, x, y, button? }` from the cursor buffer. Human moves step
  *   through interpolated waypoints, so curves/spins survive as many points.
+ *   tMs is rescaled into the measured capture.mp4 duration at close when the
+ *   wall-clock run overshoots it (sparse screencast frames pack short).
  * - `<slug>.studio/timeline.json` — semantic click/type/scroll events with
  *   boxes for zooms/ripples. This is NOT the cursor path.
  * - `<slug>.studio/style.json` — default tokens when missing (for render).
@@ -26,6 +28,7 @@
 import { promises as fs } from "node:fs";
 import { resolve, join } from "node:path";
 import { StudioBrowser, type Box, type CursorPoint } from "./browser.js";
+import { probeVideo } from "./ffmpeg.js";
 import {
   runAgent,
   type AgentBrowserLike,
@@ -94,7 +97,10 @@ function sleep(ms: number): Promise<void> {
 
 function isRecordStopFlake(err: unknown): boolean {
   const msg = err instanceof Error ? err.message : String(err ?? "");
-  return /does not contain any stream|empty|no frames|record/i.test(msg);
+  // Narrow: only the known ffmpeg zero-frame failure. In particular this
+  // must NOT match "No recording in progress" (that is the terminal state
+  // after any stop attempt, never a retryable flake).
+  return /does not contain any stream|no frames/i.test(msg);
 }
 
 type RealBrowser = AgentBrowserLike & {
@@ -193,6 +199,11 @@ export async function captureDemo(
 
       async clickRef(ref: string): Promise<unknown> {
         const box = await readBox(real, ref);
+        // Defense in depth: stash the pre-click track BEFORE the click can
+        // navigate away and destroy the page buffer. The init script now
+        // persists across navigations, so the post-click dump already
+        // contains the pre-track; dedup at close absorbs the overlap.
+        await stashBuffer(real);
         const out = await real.clickRef(ref);
         try {
           timeline.push(
@@ -274,24 +285,18 @@ export async function captureDemo(
           // so ffmpeg has a stream to mux.
           const elapsed = Date.now() - recordStartedAt;
           if (elapsed < 1000) await sleep(1000 - elapsed);
-          // `record stop` flakes intermittently with ffmpeg
-          // "Output file does not contain any stream" — retry a few times.
-          const attempts = 3;
-          for (let i = 0; i < attempts; i++) {
-            try {
-              await real.recordStop();
-              stopError = null;
-              break;
-            } catch (err) {
-              stopError = err;
-              if (i < attempts - 1) await sleep(500 * (i + 1));
-            }
+          // `record stop` is terminal: even a failed stop ends the take, so
+          // retrying always fails with "No recording in progress" and masks
+          // the real error. Attempt exactly once; recordStart/recordStop
+          // force warmup frames so the zero-frame flake should not happen.
+          try {
+            await real.recordStop();
+          } catch (err) {
+            stopError = err;
           }
-          if (stopError !== null && !isRecordStopFlake(stopError)) {
-            // Non-flake stop errors still propagate after artifacts below.
-          } else if (stopError !== null) {
+          if (stopError !== null && isRecordStopFlake(stopError)) {
             console.error(
-              `[studio-demo] record stop failed after retries: ${(stopError as Error)?.message ?? String(stopError)}`,
+              `[studio-demo] record stop failed: ${(stopError as Error)?.message ?? String(stopError)}`,
             );
           }
         }
@@ -312,10 +317,50 @@ export async function captureDemo(
         }
         const merged = [...stashed, ...(Array.isArray(points) ? points : [])];
         merged.sort((a, b) => (a.tMs ?? 0) - (b.tMs ?? 0));
+        // Stash-before-click/navigate overlaps the persisted post-navigation
+        // dump by design; dedup exact (tMs,x,y,button) repeats so the track
+        // stays dense without doubled samples.
+        const seen = new Set<string>();
+        const deduped: CursorPoint[] = [];
+        for (const p of merged) {
+          const key = `${p.tMs ?? 0}|${p.x ?? 0}|${p.y ?? 0}|${p.button ?? 0}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          deduped.push(p);
+        }
+
+        // The recorder packs sparsely-delivered screencast frames at the
+        // nominal fps, so capture.mp4's duration can be shorter than the
+        // wall-clock run (long API waits produce no frames). Cursor and
+        // timeline tMs are wall-clock since record start, but the compositor
+        // reads them in video time — overshooting samples would clamp to a
+        // frozen cursor and lost ripples. Rescale both tracks linearly into
+        // the measured video duration when they overshoot it; frames cluster
+        // at actions, so actions stay aligned with their visuals.
+        try {
+          const info = await probeVideo(capturePath);
+          const videoMs = info.durationSec * 1000;
+          let maxT = 0;
+          for (const p of deduped) maxT = Math.max(maxT, p.tMs ?? 0);
+          for (const e of timeline) maxT = Math.max(maxT, e.tMs ?? 0);
+          if (videoMs > 0 && maxT > videoMs) {
+            const s = videoMs / maxT;
+            for (const p of deduped) {
+              p.tMs = Math.max(0, Math.round((p.tMs ?? 0) * s));
+            }
+            for (const e of timeline) {
+              e.tMs = Math.max(0, Math.round((e.tMs ?? 0) * s));
+            }
+            deduped.sort((a, b) => (a.tMs ?? 0) - (b.tMs ?? 0));
+          }
+        } catch {
+          // Best effort: leave wall-clock times when the capture is missing
+          // (the stop-error handling below still reports the failure).
+        }
 
         try {
           await fs.mkdir(projectDir, { recursive: true });
-          await fs.writeFile(cursorPath, `${JSON.stringify(merged)}\n`, "utf8");
+          await fs.writeFile(cursorPath, `${JSON.stringify(deduped)}\n`, "utf8");
           await fs.writeFile(
             timelinePath,
             `${JSON.stringify(timeline)}\n`,

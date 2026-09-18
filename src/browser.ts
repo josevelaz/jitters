@@ -55,33 +55,154 @@ export interface LaunchOptions {
 
 /**
  * Page init script (embedded; written to a temp file at launch because the
- * CLI takes `--init-script <path>`). Buffers every mousemove / mousedown /
- * mouseup as { tMs, x, y, button } using client coordinates. tMs is
- * Date.now() minus a record-start offset the adapter resets when recording
- * starts, so points line up with the captured video.
+ * CLI takes `--init-script <path>`). Buffers mousemove positions as
+ * { tMs, x, y } plus mousedown/mouseup presses as { tMs, x, y, button }
+ * using client coordinates (moves carry no button field so ripple detection
+ * sees a rising edge on press; e.buttons makes a left press read 1, not 0).
+ * tMs is Date.now() minus a record-start offset the adapter resets when
+ * recording starts, so points line up with the captured video.
  */
 export const CURSOR_INIT_JS = `(() => {
   const w = window;
   if (w.__studioCursorInit) return;
   w.__studioCursorInit = true;
-  if (!Array.isArray(w.__studioCursorBuf)) w.__studioCursorBuf = [];
-  if (typeof w.__studioRecordStart !== "number") w.__studioRecordStart = Date.now();
-  const push = (e) => {
+  const SS_KEY = "__studioCursorPersist.v1";
+  const NAME_PREFIX = "__studioCursor::";
+  const readOne = (raw) => {
     try {
-      w.__studioCursorBuf.push({
+      const o = JSON.parse(raw);
+      if (o && typeof o.start === "number" && Array.isArray(o.buf)) return o;
+    } catch (_) {}
+    return null;
+  };
+  const readPersisted = () => {
+    let a = null;
+    let b = null;
+    try {
+      const raw = w.sessionStorage.getItem(SS_KEY);
+      if (raw) a = readOne(raw);
+    } catch (_) {}
+    try {
+      const nm = w.name;
+      if (typeof nm === "string" && nm.indexOf(NAME_PREFIX) === 0) {
+        b = readOne(nm.slice(NAME_PREFIX.length));
+      }
+    } catch (_) {}
+    if (a && b) {
+      // sessionStorage is per-origin (stale after a cross-origin hop) while
+      // window.name travels with the tab (fresh). Neither alone is newest,
+      // so take their union: both are append-only histories on the same
+      // record-start clock, and the union is the complete track.
+      if (a.start !== b.start) return b.buf.length >= a.buf.length ? b : a;
+      const seen = new Set();
+      const buf = [];
+      const all = a.buf.concat(b.buf);
+      for (let i = 0; i < all.length; i++) {
+        const p = all[i];
+        const k = p.tMs + "|" + p.x + "|" + p.y + "|" + p.button;
+        if (seen.has(k)) continue;
+        seen.add(k);
+        buf.push(p);
+      }
+      buf.sort((m, n) => m.tMs - n.tMs);
+      return { start: a.start, buf };
+    }
+    return b || a;
+  };
+  const writePersistedWith = (start, buf) => {
+    let payload = "";
+    try {
+      payload = JSON.stringify({ start, buf });
+    } catch (_) {
+      return;
+    }
+    try {
+      w.sessionStorage.setItem(SS_KEY, payload);
+    } catch (_) {
+      try {
+        w.sessionStorage.setItem(SS_KEY, JSON.stringify({ start, buf: buf.slice(-5000) }));
+      } catch (_) {}
+    }
+    try {
+      w.name = NAME_PREFIX + payload;
+    } catch (_) {
+      try {
+        w.name = NAME_PREFIX + JSON.stringify({ start, buf: buf.slice(-5000) });
+      } catch (_) {}
+    }
+  };
+  const writePersisted = () => {
+    writePersistedWith(w.__studioRecordStart, w.__studioCursorBuf);
+  };
+  const restored = readPersisted();
+  if (restored) {
+    w.__studioCursorBuf = restored.buf;
+    w.__studioRecordStart = restored.start;
+  } else {
+    if (!Array.isArray(w.__studioCursorBuf)) w.__studioCursorBuf = [];
+    if (typeof w.__studioRecordStart !== "number") w.__studioRecordStart = Date.now();
+    try {
+      writePersisted();
+    } catch (_) {}
+  }
+  let lastFlush = 0;
+  let flushTimer = null;
+  const schedulePersist = () => {
+    try {
+      const now = Date.now();
+      if (now - lastFlush > 300) {
+        lastFlush = now;
+        writePersisted();
+      } else if (!flushTimer) {
+        flushTimer = setTimeout(() => {
+          flushTimer = null;
+          lastFlush = Date.now();
+          try {
+            writePersisted();
+          } catch (_) {}
+        }, 350);
+      }
+    } catch (_) {}
+  };
+  const push = (e, btn) => {
+    try {
+      const sample = {
         tMs: Date.now() - w.__studioRecordStart,
         x: e.clientX,
         y: e.clientY,
-        button: typeof e.button === "number" ? e.button : 0,
-      });
+      };
+      // Moves carry no button field (plain moves); only presses carry
+      // button state, so a mousedown is a rising edge. e.button is 0 for a
+      // left press (indistinguishable from a move), so presses store
+      // e.buttons (left press reads 1).
+      if (btn !== undefined) sample.button = btn;
+      w.__studioCursorBuf.push(sample);
+      schedulePersist();
     } catch (_) {}
   };
-  w.addEventListener("mousemove", push, true);
-  w.addEventListener("mousedown", push, true);
-  w.addEventListener("mouseup", push, true);
+  const flush = () => {
+    try {
+      lastFlush = Date.now();
+      writePersisted();
+    } catch (_) {}
+  };
+  w.addEventListener("mousemove", (e) => push(e), true);
+  w.addEventListener("mousedown", (e) => push(e, (typeof e.buttons === "number" && e.buttons > 0) ? e.buttons : ((typeof e.button === "number" ? e.button : 0) + 1)), true);
+  w.addEventListener("mouseup", (e) => push(e, (typeof e.buttons === "number" ? e.buttons : 0)), true);
+  w.addEventListener("pagehide", flush, true);
+  w.addEventListener("beforeunload", flush, true);
+  try {
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") flush();
+    });
+  } catch (_) {}
   w.__studioMarkRecordStart = () => {
     w.__studioCursorBuf = [];
     w.__studioRecordStart = Date.now();
+    lastFlush = Date.now();
+    try {
+      writePersistedWith(w.__studioRecordStart, w.__studioCursorBuf);
+    } catch (_) {}
     return w.__studioRecordStart;
   };
 })();
@@ -365,16 +486,38 @@ export class StudioBrowser {
   }
 
   /**
+   * Force one captured frame via a throwaway screenshot. Headless screencast
+   * emits nothing on a fully static page, and ffmpeg then fails the take
+   * with "Output file does not contain any stream". Best effort: a missing
+   * warmup frame only risks that flake.
+   */
+  private warmupFrame(): void {
+    try {
+      const dir = this.initScriptDir ?? tmpdir();
+      runCli(this.sessionId, [
+        "screenshot",
+        join(dir, "record-warmup.png"),
+      ]);
+    } catch {
+      // best effort (see above)
+    }
+  }
+
+  /**
    * Start video recording (NO `--cursor`: the cursor is overlaid later from
    * the cursor buffer). Resets the cursor clock so tMs lines up with the
-   * capture, and returns the record-start epoch ms.
+   * capture, forces one frame so a static page still yields a stream,
+   * and returns the record-start epoch ms.
    */
   async recordStart(path: string, fps = 60): Promise<number> {
     runCli(this.sessionId, ["record", "start", path, "--fps", String(fps)]);
-    return this.markRecordStart();
+    const epoch = await this.markRecordStart();
+    this.warmupFrame();
+    return epoch;
   }
 
   async recordStop(): Promise<void> {
+    this.warmupFrame();
     runCli(this.sessionId, ["record", "stop"]);
   }
 
@@ -391,7 +534,7 @@ export class StudioBrowser {
   /** Reset the cursor buffer + record-start clock; returns start epoch ms. */
   async markRecordStart(): Promise<number> {
     const raw = await this.evalJs(
-      "JSON.stringify(typeof window.__studioMarkRecordStart === 'function' ? window.__studioMarkRecordStart() : ((window.__studioCursorBuf = [], window.__studioRecordStart = Date.now())))",
+      "JSON.stringify(typeof window.__studioMarkRecordStart === 'function' ? window.__studioMarkRecordStart() : ((window.__studioCursorBuf = [], window.__studioRecordStart = Date.now(), (function(){ try { window.sessionStorage.removeItem('__studioCursorPersist.v1'); } catch(_){} try { if (typeof window.name === 'string' && window.name.indexOf('__studioCursor::') === 0) window.name = ''; } catch(_){} })(), window.__studioRecordStart)))",
     );
     const n = Number(JSON.parse(raw));
     return Number.isFinite(n) ? n : Date.now();
@@ -400,7 +543,7 @@ export class StudioBrowser {
   /** Dump the cursor buffer via `eval --stdin`. */
   async cursorBuffer(): Promise<CursorPoint[]> {
     const raw = await this.evalJs(
-      "JSON.stringify(window.__studioCursorBuf || [])",
+      "JSON.stringify((function(){ try { if (Array.isArray(window.__studioCursorBuf) && window.__studioCursorBuf.length > 0) return window.__studioCursorBuf; } catch(_){} try { var raw = window.sessionStorage.getItem('__studioCursorPersist.v1'); if (raw) { var o = JSON.parse(raw); if (o && Array.isArray(o.buf) && o.buf.length > 0) return o.buf; } } catch(_){} try { var nm = window.name; if (typeof nm === 'string' && nm.indexOf('__studioCursor::') === 0) { var p = JSON.parse(nm.slice('__studioCursor::'.length)); if (p && Array.isArray(p.buf)) return p.buf; } } catch(_){} try { if (Array.isArray(window.__studioCursorBuf)) return window.__studioCursorBuf; } catch(_){} return []; })())",
     );
     let parsed: unknown;
     try {
@@ -417,18 +560,20 @@ export class StudioBrowser {
       if (typeof p?.tMs !== "number" || typeof p?.x !== "number" || typeof p?.y !== "number") {
         continue;
       }
-      points.push({
-        tMs: p.tMs,
-        x: p.x,
-        y: p.y,
-        button: typeof p.button === "number" ? p.button : 0,
-      });
+      // Preserve a missing button as missing: plain moves carry no button
+      // field, and the ripple latch relies on that (only samples with
+      // button info update it). Defaulting moves to 0 would re-arm it.
+      const pt: CursorPoint = { tMs: p.tMs, x: p.x, y: p.y };
+      if (typeof p.button === "number") pt.button = p.button;
+      points.push(pt);
     }
     return points;
   }
 
   async clearCursorBuffer(): Promise<void> {
-    await this.evalJs("JSON.stringify((window.__studioCursorBuf = [], true))");
+    await this.evalJs(
+      "JSON.stringify((window.__studioCursorBuf = [], (function(){ try { window.sessionStorage.removeItem('__studioCursorPersist.v1'); } catch(_){} try { if (typeof window.name === 'string' && window.name.indexOf('__studioCursor::') === 0) window.name = ''; } catch(_){} })(), true))",
+    );
   }
 
   /** Close ONLY this session (never `--all`, never the default session). */
