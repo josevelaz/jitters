@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>jitters — framed demo videos from a prompt</title>
+  <meta name="description" content="jitters turns a natural-language prompt into a framed MP4: agent-driven browser capture, then a restylable studio composite.">
+  <meta name="theme-color" content="#080c16">
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/site.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="top">
+    <a class="wordmark" href="./index.html" aria-current="page">jitt<span>ers</span></a>
+    <input type="checkbox" id="nav-toggle">
+    <label class="nav-btn" for="nav-toggle">Menu</label>
+    <nav>
+      <a href="./tutorial.html">Tutorial</a>
+      <a href="./how-to.html">How-to</a>
+      <a href="./reference.html">Reference</a>
+      <a href="./explanation.html">Explanation</a>
+      <a class="gh" href="https://github.com/josevelaz/jitters">GitHub</a>
+    </nav>
+  </header>
+
+  <main id="main" class="wrap">
+    <section class="hero">
+      <div>
+        <p class="kicker">Prompt in · MP4 out</p>
+        <h1>A studio-framed demo from one sentence.</h1>
+        <p class="lede">jitters drives a real browser from a prompt, records page pixels, then composites a window, background, synthetic cursor, zooms, ripples, and motion blur. Capture once. Restyle forever.</p>
+      </div>
+      <div class="studio" aria-hidden="true">
+        <div class="studio-window">
+          <div class="chrome"><i></i><i></i><i></i></div>
+          <div class="page-lines">
+            open https://example.com<br>
+            click “More information…”<br>
+            hold for zoom-out<br>
+            export 1920×1080
+          </div>
+          <span class="ripple"></span>
+          <span class="cursor"></span>
+        </div>
+      </div>
+    </section>
+
+    <h2>Start here</h2>
+    <p>From a clone of the repo, after <code>pnpm install</code> and <code>pnpm build</code>:</p>
+<pre><code>jitters "Open https://example.com and click 'More information...'" --url https://example.com</code></pre>
+    <p>Stdout is JSON pointing at the MP4 and the project folder. Logs go to stderr so agents can parse the result.</p>
+<pre><code>{ "status": "done", "out": "/abs/demo.mp4", "project": "/abs/demo.jitters", "durationMs": 12345, "steps": [] }</code></pre>
+
+    <div class="doors">
+      <a class="door" href="./tutorial.html">
+        <b>Tutorial</b>
+        <span>Capture your first framed demo end to end.</span>
+      </a>
+      <a class="door" href="./how-to.html">
+        <b>How-to</b>
+        <span>Restyle, switch providers, and set defaults.</span>
+      </a>
+      <a class="door" href="./reference.html">
+        <b>Reference</b>
+        <span>CLI flags, style.json, config.toml, stdout.</span>
+      </a>
+      <a class="door" href="./explanation.html">
+        <b>Explanation</b>
+        <span>Why capture and render are two different jobs.</span>
+      </a>
+    </div>
+
+    <h2>What you need</h2>
+    <ul>
+      <li>Node.js, with the package built (<code>pnpm build</code>).</li>
+      <li><code>agent-browser</code> on <code>PATH</code>, with Chrome installed via <code>agent-browser install</code>.</li>
+      <li><code>ffmpeg</code> on <code>PATH</code>.</li>
+      <li>A provider API key in the environment — never in config, video, or stdout. TypeSafe is the default (<code>TYPESAFE_API_KEY</code>).</li>
+    </ul>
+    <p class="callout"><code>--help</code> works with none of those. Capture checks the selected provider key, <code>agent-browser</code>, and <code>ffmpeg</code>, then names whichever is missing. Render only needs <code>ffmpeg</code>.</p>
+  </main>
+
+  <footer class="foot">
+    <span>jitters · prompt in, MP4 out</span>
+    <span><a href="https://github.com/josevelaz/jitters">Source</a></span>
+  </footer>
+  <script src="./assets/site.js"></script>
+</body>
+</html>

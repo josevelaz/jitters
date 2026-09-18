@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How-to — Restyle, providers, and config · jitters</title>
+  <meta name="description" content="Recipes for restyling a jitters take, quoting type-in text, switching AI providers, and setting jitters.toml defaults.">
+  <meta name="theme-color" content="#080c16">
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/site.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="top">
+    <a class="wordmark" href="./index.html">jitt<span>ers</span></a>
+    <input type="checkbox" id="nav-toggle">
+    <label class="nav-btn" for="nav-toggle">Menu</label>
+    <nav>
+      <a href="./tutorial.html">Tutorial</a>
+      <a href="./how-to.html" aria-current="page">How-to</a>
+      <a href="./reference.html">Reference</a>
+      <a href="./explanation.html">Explanation</a>
+      <a class="gh" href="https://github.com/josevelaz/jitters">GitHub</a>
+    </nav>
+  </header>
+
+  <div class="wrap layout">
+    <aside class="toc">
+      <p>Recipes</p>
+      <a href="#quote">Quote type-in text</a>
+      <a href="#restyle">Restyle without Chrome</a>
+      <a href="#providers">Switch providers</a>
+      <a href="#config">Set defaults</a>
+      <a href="#agents">Use it from an agent</a>
+    </aside>
+    <main id="main" class="prose">
+      <p class="kicker">How-to</p>
+      <h1>Solve a specific job</h1>
+      <p>Each recipe assumes you can already run <code>node dist/cli.js --help</code>. Swap that for <code>jitters</code> if the binary is on your <code>PATH</code>.</p>
+
+      <h2 id="quote">Quote the text the agent should type</h2>
+      <p>The loop never invents copy. It only types strings extracted from the prompt (quoted text, or phrases after “search for” / “type” / “enter”).</p>
+<pre><code>node dist/cli.js "type 'hello@example.com' into the email field and submit" --url https://example.com</code></pre>
+      <p>If you need a URL in the closed set, put the <code>https://…</code> in the prompt or pass <code>--url</code>.</p>
+      <p class="callout warn">If the model chooses <code>type</code> or <code>navigate</code> but the matching choice is <code>none</code>, jitters finishes instead of fabricating a string or URL.</p>
+
+      <h2 id="restyle">Restyle a take without recapturing</h2>
+      <p>Use this when the story is right and only the look should change.</p>
+      <ol>
+        <li>Edit <code>&lt;slug&gt;.jitters/style.json</code>. Typical knobs: <code>cursor.size</code>, <code>zoom.scale</code>, <code>motionBlur.samples</code>, <code>padding</code>, <code>background</code>.</li>
+        <li>Recomposite:</li>
+      </ol>
+<pre><code>node dist/cli.js render ./demo.jitters
+node dist/cli.js render ./demo.jitters --style ./custom.json --format 1280x720 --bg "#111111" --out ./demo-v2.mp4</code></pre>
+      <p><code>--style</code> replaces the style file for that export. <code>--format</code> and <code>--bg</code> override one export. Chrome is not launched. Render only needs <code>ffmpeg</code>.</p>
+      <p>Recapture only if the page footage or the mouse track must change.</p>
+
+      <h2 id="providers">Switch the judgment provider</h2>
+      <p>The step loop is the same for every backend. Only the client changes.</p>
+<pre><code>node dist/cli.js "show the signup flow" --url https://example.com --provider openrouter
+node dist/cli.js "show the signup flow" --url https://example.com --provider vercel --model openai/gpt-4o-mini
+node dist/cli.js "show the signup flow" --url https://example.com --provider cloudflare --model openai/gpt-4o-mini</code></pre>
+      <table>
+        <thead>
+          <tr><th>Provider</th><th>Environment</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>typesafe</code> (default)</td><td><code>TYPESAFE_API_KEY</code></td></tr>
+          <tr><td><code>vercel</code></td><td><code>AI_GATEWAY_API_KEY</code> or <code>VERCEL_OIDC_TOKEN</code></td></tr>
+          <tr><td><code>openrouter</code></td><td><code>OPENROUTER_API_KEY</code></td></tr>
+          <tr><td><code>cloudflare</code></td><td><code>CLOUDFLARE_API_TOKEN</code> and <code>CLOUDFLARE_ACCOUNT_ID</code></td></tr>
+        </tbody>
+      </table>
+      <p>Gateway providers default to model <code>openai/gpt-4o-mini</code> unless you pass <code>--model</code>. TypeSafe uses the SDK default (<code>jev-latest</code>) unless <code>--model</code> is set. Optional Cloudflare gateway id: <code>CLOUDFLARE_AI_GATEWAY_ID</code> (default <code>default</code>), or <code>cloudflare_gateway</code> in config.</p>
+
+      <h2 id="config">Set defaults in jitters.toml</h2>
+      <p>First existing file wins (not merged): <code>./jitters.toml</code>, then <code>$XDG_CONFIG_HOME/jitters/config.toml</code> (or <code>~/.config/jitters/config.toml</code>). Flags override the file.</p>
+<pre><code>node dist/cli.js config            # JSON: which file is active
+node dist/cli.js config --skill    # print the skill for editing that file</code></pre>
+<pre><code># url = "https://example.com"
+# max_steps = 20
+# format = "1920x1080"
+# provider = "typesafe"
+# model = "openai/gpt-4o-mini"
+
+[style.zoom]
+scale = 1.6
+
+[style.cursor]
+size = 32</code></pre>
+      <p>A <code>[style]</code> table is copied into a new project’s <code>style.json</code> at capture. An existing <code>style.json</code> stays until recapture or <code>--style</code>. Never put API keys in the TOML file.</p>
+
+      <h2 id="agents">Use jitters from an agent</h2>
+      <p>Point the agent at <code>SKILL.md</code> in the repo. Capture once from the user prompt, parse stdout JSON, then edit <code>style.json</code> and run <code>render</code> for look changes. Keep keys and agent-browser state out of the video, stdout, and the repo.</p>
+    </main>
+  </div>
+
+  <footer class="foot">
+    <span>jitters · prompt in, MP4 out</span>
+    <span><a href="./reference.html">CLI reference</a></span>
+  </footer>
+  <script src="./assets/site.js"></script>
+</body>
+</html>

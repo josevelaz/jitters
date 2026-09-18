@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tutorial — Capture your first demo · jitters</title>
+  <meta name="description" content="A first lesson: install jitters, capture a framed demo of example.com, and inspect the project folder.">
+  <meta name="theme-color" content="#080c16">
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/site.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="top">
+    <a class="wordmark" href="./index.html">jitt<span>ers</span></a>
+    <input type="checkbox" id="nav-toggle">
+    <label class="nav-btn" for="nav-toggle">Menu</label>
+    <nav>
+      <a href="./tutorial.html" aria-current="page">Tutorial</a>
+      <a href="./how-to.html">How-to</a>
+      <a href="./reference.html">Reference</a>
+      <a href="./explanation.html">Explanation</a>
+      <a class="gh" href="https://github.com/josevelaz/jitters">GitHub</a>
+    </nav>
+  </header>
+
+  <div class="wrap layout">
+    <aside class="toc">
+      <p>On this page</p>
+      <a href="#goal">The goal</a>
+      <a href="#build">Build the CLI</a>
+      <a href="#bins">External binaries</a>
+      <a href="#key">Provider key</a>
+      <a href="#run">Run the capture</a>
+      <a href="#look">Look at the result</a>
+    </aside>
+    <main id="main" class="prose">
+      <p class="kicker">Tutorial</p>
+      <h1>Capture your first demo</h1>
+      <p>This lesson walks a new machine from a clone of jitters to a framed MP4. You will record example.com, click “More information…”, and open the export.</p>
+
+      <h2 id="goal">The goal</h2>
+      <p>When you finish, you will have:</p>
+      <ul>
+        <li>A JSON result on stdout with <code>status</code> <code>done</code>.</li>
+        <li>An MP4 next to a <code>*.jitters/</code> project folder.</li>
+        <li>Raw page footage in that folder with no pointer drawn on it.</li>
+      </ul>
+
+      <h2 id="build">Build the CLI</h2>
+      <ol class="steps">
+        <li>
+          <p>Clone the repository and install JavaScript dependencies.</p>
+<pre><code>git clone https://github.com/josevelaz/jitters.git
+cd jitters
+pnpm install</code></pre>
+        </li>
+        <li>
+          <p>Compile TypeScript. The binary is <code>dist/cli.js</code>.</p>
+<pre><code>pnpm build
+node dist/cli.js --help</code></pre>
+          <p>You should see usage for <code>&lt;prompt&gt;</code>, <code>render</code>, and <code>config</code>. Help does not need API keys or extra binaries.</p>
+        </li>
+      </ol>
+
+      <h2 id="bins">Install the external binaries</h2>
+      <ol class="steps">
+        <li>
+          <p>Put <a href="https://ffmpeg.org">ffmpeg</a> on your <code>PATH</code>. Confirm with <code>ffmpeg -version</code>.</p>
+        </li>
+        <li>
+          <p>Install <code>agent-browser</code> and its Chrome:</p>
+<pre><code>agent-browser --version
+agent-browser install</code></pre>
+        </li>
+      </ol>
+
+      <h2 id="key">Export a provider key</h2>
+      <p>The default backend is TypeSafe. Export the key in the shell that will run jitters — not in a file in this repo.</p>
+<pre><code>export TYPESAFE_API_KEY="your-key"</code></pre>
+      <p>To use another backend instead, see <a href="./how-to.html#providers">Switch the judgment provider</a>.</p>
+
+      <h2 id="run">Run the capture</h2>
+      <p>Quote the link text so it becomes a type/click candidate. Pass the starting URL with <code>--url</code>.</p>
+<pre><code>node dist/cli.js "Open https://example.com and click 'More information...'" --url https://example.com</code></pre>
+      <p>Wait until stdout prints one JSON object. <code>status</code> should be <code>done</code>. If a dependency is missing, the process exits nonzero and names it on stderr.</p>
+
+      <h2 id="look">Look at the result</h2>
+      <ol class="steps">
+        <li>
+          <p>Open the path in the JSON <code>out</code> field. You should see a 1920×1080 (by default) framed window on a dark-to-blue background, a synthetic cursor, and a zoom toward the link.</p>
+        </li>
+        <li>
+          <p>Open the <code>project</code> directory. It contains:</p>
+          <ul>
+            <li><code>capture.mp4</code> — page pixels only, no cursor.</li>
+            <li><code>cursor.json</code> — sampled mouse positions.</li>
+            <li><code>timeline.json</code> — click/type/scroll events with boxes.</li>
+            <li><code>style.json</code> — compositor tokens for the next render.</li>
+          </ul>
+        </li>
+      </ol>
+      <p>You now have a restylable take. Next: <a href="./how-to.html#restyle">re-render without Chrome</a>.</p>
+    </main>
+  </div>
+
+  <footer class="foot">
+    <span>jitters · prompt in, MP4 out</span>
+    <span><a href="./how-to.html">How-to guides</a></span>
+  </footer>
+  <script src="./assets/site.js"></script>
+</body>
+</html>
