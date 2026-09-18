@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+.env.*
+*.pem
+*.key
+.agent-browser/
+agent-browser-state/
+browser-profile/
+*.har

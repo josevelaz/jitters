@@ -1,0 +1,24 @@
+{
+  "name": "studio-demo",
+  "version": "0.1.0",
+  "description": "Prompt-in / MP4-out demo video studio (TypeSafe + agent-browser + ffmpeg)",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "studio-demo": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "prepare": "tsc",
+    "dev": "node src/cli.ts"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^1.0.9",
+    "@typesafe-ai/sdk": "^0.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.0",
+    "typescript": "^5.6.0"
+  }
+}
